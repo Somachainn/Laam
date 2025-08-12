@@ -1,457 +1,262 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolmoon - P2P Solana Token Order Book</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
-            color: #2c5530;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
-        }
-
-        .logo {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 15px;
-            background: linear-gradient(45deg, #4a9d5f, #2d6b3d);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        h1 {
-            color: #2d6b3d;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #4a9d5f;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(44, 85, 48, 0.1);
-            border: 2px solid #e8f5e8;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #2d6b3d;
-        }
-
-        .stat-label {
-            color: #4a9d5f;
-            margin-top: 5px;
-        }
-
-        .order-book {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .order-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
-        }
-
-        .section-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid;
-        }
-
-        .buy-orders .section-title {
-            color: #2d6b3d;
-            border-color: #4a9d5f;
-        }
-
-        .sell-orders .section-title {
-            color: #d4691a;
-            border-color: #f4a460;
-        }
-
-        .order-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 10px;
-            padding: 10px;
-            background: #f8fdf8;
-            border-radius: 8px;
-            font-weight: bold;
-            color: #2d6b3d;
-            margin-bottom: 10px;
-        }
-
-        .order-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 10px;
-            padding: 12px 10px;
-            border-bottom: 1px solid #e8f5e8;
-            transition: background-color 0.3s ease;
-            cursor: pointer;
-        }
-
-        .order-row:hover {
-            background-color: #f0f8f0;
-        }
-
-        .buy-orders .order-row:hover {
-            background-color: #e8f5e8;
-        }
-
-        .sell-orders .order-row:hover {
-            background-color: #fff5e6;
-        }
-
-        .price {
-            font-weight: bold;
-        }
-
-        .buy-orders .price {
-            color: #2d6b3d;
-        }
-
-        .sell-orders .price {
-            color: #d4691a;
-        }
-
-        .amount {
-            color: #4a9d5f;
-        }
-
-        .total {
-            color: #666;
-        }
-
-        .trader {
-            color: #888;
-            font-size: 0.9em;
-        }
-
-        .recent-trades {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .trade-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 15px;
-            padding: 10px;
-            border-bottom: 1px solid #e8f5e8;
-        }
-
-        .trade-row:last-child {
-            border-bottom: none;
-        }
-
-        .trade-price {
-            font-weight: bold;
-        }
-
-        .trade-buy {
-            color: #2d6b3d;
-        }
-
-        .trade-sell {
-            color: #d4691a;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
-            color: #4a9d5f;
-        }
-
-        .refresh-btn {
-            background: linear-gradient(45deg, #4a9d5f, #2d6b3d);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            margin: 20px auto;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 768px) {
-            .order-book {
-                grid-template-columns: 1fr;
-            }
-            
-            .order-header, .order-row, .trade-row {
-                grid-template-columns: 1fr 1fr;
-                gap: 5px;
-            }
-            
-            .order-header span:nth-child(3),
-            .order-header span:nth-child(4),
-            .order-row span:nth-child(3),
-            .order-row span:nth-child(4),
-            .trade-row span:nth-child(3),
-            .trade-row span:nth-child(4) {
-                display: none;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Laam & XLM — Simple Stellar P2P (Prototype)</title>
+  <style>
+    body{font-family:Inter, Roboto, Arial;max-width:980px;margin:18px auto;padding:12px}
+    .card{border:1px solid #e6e6e6;border-radius:8px;padding:14px;margin-bottom:12px}
+    label{display:block;margin-top:8px}
+    input,select,button{padding:8px;margin-top:6px;width:100%;box-sizing:border-box}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    pre{background:#f7f7f7;padding:10px;border-radius:6px;overflow:auto}
+    .warn{background:#fff4e5;border:1px solid #ffd7a8;padding:8px;border-radius:6px}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">T</div>
-            <h1>Toolmoon</h1>
-            <div class="subtitle">P2P Solana Token Order Book</div>
-            <div class="subtitle">Real-time SOL/USDC Trading</div>
-        </div>
+  <h1>Laam ↔ XLM — Stellar P2P Prototype</h1>
+  <p>Prototype: Connect with <strong>Albedo</strong> or paste a <strong>secret key</strong> (for testing only). Creates & views offers for the Laam/XLM pair.</p>  <div class="card">
+    <h3>1) Wallet / Access</h3>
+    <div class="warn"><strong>Security:</strong> Never paste your production secret key into random pages. This field is only for local testing.</div><div style="margin-top:10px">
+  <button id="btnAlbedo">Connect with Albedo (recommended)</button>
+  <button id="btnDisconnect">Disconnect</button>
+</div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="currentPrice">$142.35</div>
-                <div class="stat-label">Current Price</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="volume24h">$2.4M</div>
-                <div class="stat-label">24h Volume</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="change24h">+3.2%</div>
-                <div class="stat-label">24h Change</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="activeOrders">47</div>
-                <div class="stat-label">Active Orders</div>
-            </div>
-        </div>
+<label>Or paste secret key (for testing):</label>
+<input id="secretInput" placeholder="S... (secret key)" />
+<button id="btnUseSecret">Use Secret Key</button>
 
-        <div class="order-book">
-            <div class="order-section buy-orders">
-                <div class="section-title">🟢 Buy Orders</div>
-                <div class="order-header">
-                    <span>Price (USDC)</span>
-                    <span>Amount (SOL)</span>
-                    <span>Total (USDC)</span>
-                    <span>Trader</span>
-                </div>
-                <div id="buyOrders"></div>
-            </div>
+<p>Public Key: <span id="pubKey">—</span></p>
 
-            <div class="order-section sell-orders">
-                <div class="section-title">🔴 Sell Orders</div>
-                <div class="order-header">
-                    <span>Price (USDC)</span>
-                    <span>Amount (SOL)</span>
-                    <span>Total (USDC)</span>
-                    <span>Trader</span>
-                </div>
-                <div id="sellOrders"></div>
-            </div>
-        </div>
-
-        <div class="recent-trades">
-            <div class="section-title" style="color: #2d6b3d; border-color: #4a9d5f;">📊 Recent Trades</div>
-            <div class="order-header">
-                <span>Time</span>
-                <span>Price (USDC)</span>
-                <span>Amount (SOL)</span>
-                <span>Type</span>
-            </div>
-            <div id="recentTrades"></div>
-        </div>
-
-        <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
-
-        <div class="footer">
-            <p>Toolmoon P2P Exchange - Secure Solana Token Trading</p>
-            <p>Real-time order book powered by decentralized trading</p>
-        </div>
+  </div>  <div class="card">
+    <h3>2) Order Book (Laam / XLM)</h3>
+    <div>
+      <button id="btnRefresh">Refresh Orderbook</button>
     </div>
+    <div class="row">
+      <div class="col">
+        <h4>Asks (Sell Laam → XLM)</h4>
+        <div id="asks"></div>
+      </div>
+      <div class="col">
+        <h4>Bids (Buy Laam ← XLM)</h4>
+        <div id="bids"></div>
+      </div>
+    </div>
+  </div>  <div class="card">
+    <h3>3) Create Offer</h3>
+    <label>Side</label>
+    <select id="side">
+      <option value="sell">Sell Laam (receive XLM)</option>
+      <option value="buy">Buy Laam (spend XLM)</option>
+    </select><label>Amount (Laam)</label>
+<input id="amount" placeholder="e.g. 10" />
+<label>Price (XLM per Laam)</label>
+<input id="price" placeholder="e.g. 0.5" />
+<button id="btnCreateOffer">Create Offer</button>
 
-    <script>
-        // Sample data generation
-        function generateRandomPrice(base, variance) {
-            return (base + (Math.random() - 0.5) * variance).toFixed(2);
+<p id="txStatus"></p>
+
+  </div>  <div class="card">
+    <h3>4) Trade History (recent)</h3>
+    <div id="trades"></div>
+  </div>  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/8.2.3/stellar-sdk.min.js"></script>  <!-- Albedo intent library: if not available the Albedo button will fail gracefully -->  <script src="https://unpkg.com/@albedo-link/intent/dist/bundle.min.js"></script>  <script>
+    // ----- Configuration -----
+    const HORIZON = 'https://horizon.stellar.org';
+    const SERVER = new StellarSdk.Server(HORIZON);
+
+    // Laam token info (from your project memory)
+    const LAAM_CODE = 'Laam';
+    const LAAM_ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
+
+    // UI refs
+    const pubKeyEl = document.getElementById('pubKey');
+    const btnAlbedo = document.getElementById('btnAlbedo');
+    const btnDisconnect = document.getElementById('btnDisconnect');
+    const secretInput = document.getElementById('secretInput');
+    const btnUseSecret = document.getElementById('btnUseSecret');
+    const asksEl = document.getElementById('asks');
+    const bidsEl = document.getElementById('bids');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnCreateOffer = document.getElementById('btnCreateOffer');
+    const txStatus = document.getElementById('txStatus');
+    const tradesEl = document.getElementById('trades');
+
+    let activeKeypair = null; // StellarSdk.Keypair or null
+    let albedoPubKey = null; // when connected by albedo
+    let useAlbedo = false;
+
+    // ----- Wallet Connect (Albedo) -----
+    btnAlbedo.onclick = async () => {
+      try {
+        // albedo.link intent usage
+        const res = await albedo.publicKey();
+        if (res && res.pubkey) {
+          albedoPubKey = res.pubkey;
+          useAlbedo = true;
+          activeKeypair = null;
+          pubKeyEl.textContent = albedoPubKey;
+          txStatus.textContent = 'Connected via Albedo';
+        } else {
+          txStatus.textContent = 'Albedo did not return a key';
+        }
+      } catch (e) {
+        console.error(e);
+        txStatus.textContent = 'Albedo connect failed — is Albedo installed / mobile app available?';
+      }
+    };
+
+    btnDisconnect.onclick = () => {
+      activeKeypair = null; albedoPubKey = null; useAlbedo = false;
+      pubKeyEl.textContent = '—';
+      txStatus.textContent = 'Disconnected';
+    };
+
+    // ----- Secret key usage (testing only) -----
+    btnUseSecret.onclick = () => {
+      const s = secretInput.value.trim();
+      try {
+        if (!s) throw new Error('No secret');
+        const kp = StellarSdk.Keypair.fromSecret(s);
+        activeKeypair = kp;
+        useAlbedo = false;
+        albedoPubKey = null;
+        pubKeyEl.textContent = kp.publicKey();
+        txStatus.textContent = 'Using secret key (testing only)';
+      } catch (e) {
+        alert('Invalid secret key');
+      }
+    };
+
+    // ----- Orderbook fetching -----
+    async function loadOrderbook() {
+      asksEl.innerHTML = 'Loading...'; bidsEl.innerHTML = 'Loading...';
+      try {
+        const res = await fetch(`${HORIZON}/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_CODE}&selling_asset_issuer=${LAAM_ISSUER}&buying_asset_type=native`);
+        const ob = await res.json();
+        renderSide(asksEl, ob.asks);
+        renderSide(bidsEl, ob.bids);
+      } catch (e) {
+        asksEl.textContent = 'Failed to load'; bidsEl.textContent = 'Failed to load';
+        console.error(e);
+      }
+    }
+
+    function renderSide(container, items){
+      container.innerHTML = '';
+      if (!items || items.length === 0) { container.textContent = '—'; return; }
+      const ul = document.createElement('div');
+      items.slice(0,20).forEach(it => {
+        const d = document.createElement('div');
+        d.innerHTML = `Price: ${it.price} — Amount: ${it.amount}`;
+        ul.appendChild(d);
+      });
+      container.appendChild(ul);
+    }
+
+    btnRefresh.onclick = loadOrderbook;
+    loadOrderbook();
+
+    // ----- Create Offer -----
+    btnCreateOffer.onclick = async () => {
+      txStatus.textContent = '';
+      const side = document.getElementById('side').value;
+      const amount = document.getElementById('amount').value.trim();
+      const price = document.getElementById('price').value.trim();
+      if (!amount || isNaN(Number(amount)) || !price || isNaN(Number(price))) { alert('Enter numeric amount & price'); return; }
+
+      // build transaction
+      try {
+        let sourcePub;
+        if (useAlbedo && albedoPubKey) sourcePub = albedoPubKey;
+        else if (activeKeypair) sourcePub = activeKeypair.publicKey();
+        else { alert('Connect wallet (Albedo) or provide secret key'); return; }
+
+        const account = await SERVER.loadAccount(sourcePub);
+        const fee = await SERVER.fetchBaseFee();
+
+        const txb = new StellarSdk.TransactionBuilder(account, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC });
+
+        const laamAsset = new StellarSdk.Asset(LAAM_CODE, LAAM_ISSUER);
+
+        if (side === 'sell'){
+          // sell Laam, buy XLM
+          txb.addOperation(StellarSdk.Operation.manageSellOffer({
+            selling: laamAsset,
+            buying: StellarSdk.Asset.native(),
+            amount: amount.toString(),
+            price: price.toString()
+          }));
+        } else {
+          // buy Laam: sell XLM to buy Laam -> create manageBuyOffer
+          txb.addOperation(StellarSdk.Operation.manageBuyOffer({
+            selling: StellarSdk.Asset.native(),
+            buying: laamAsset,
+            buyAmount: amount.toString(),
+            price: price.toString()
+          }));
         }
 
-        function generateRandomAmount() {
-            return (Math.random() * 50 + 0.1).toFixed(3);
-        }
+        const tx = txb.setTimeout(30).build();
 
-        function generateTraderName() {
-            const prefixes = ['Sol', 'Moon', 'Crypto', 'Degen', 'Whale', 'Ape', 'Diamond', 'Rocket'];
-            const suffixes = ['Trader', 'Hodler', 'Master', 'Pro', 'King', 'Lord', 'Ninja', 'Guru'];
-            return prefixes[Math.floor(Math.random() * prefixes.length)] + 
-                   suffixes[Math.floor(Math.random() * suffixes.length)] + 
-                   Math.floor(Math.random() * 999);
-        }
-
-        function generateBuyOrders() {
-            const buyOrdersDiv = document.getElementById('buyOrders');
-            buyOrdersDiv.innerHTML = '';
-            
-            const basePrice = 142.35;
-            for (let i = 0; i < 8; i++) {
-                const price = generateRandomPrice(basePrice - (i * 0.5), 0.3);
-                const amount = generateRandomAmount();
-                const total = (price * amount).toFixed(2);
-                const trader = generateTraderName();
-                
-                const orderRow = document.createElement('div');
-                orderRow.className = 'order-row';
-                orderRow.innerHTML = `
-                    <span class="price">$${price}</span>
-                    <span class="amount">${amount}</span>
-                    <span class="total">$${total}</span>
-                    <span class="trader">${trader}</span>
-                `;
-                buyOrdersDiv.appendChild(orderRow);
+        if (useAlbedo && albedoPubKey) {
+          // sign via albedo
+          try {
+            const xdr = tx.toXDR();
+            const sigRes = await albedo.sign({tx: xdr});
+            // submit signature(s) — albedo returns signature(s) which are applied client-side
+            // Here we expect albedo to return a signed envelope xdr
+            if (sigRes && sigRes.signed_envelope_xdr) {
+              const submitRes = await SERVER.submitTransaction(sigRes.signed_envelope_xdr);
+              txStatus.textContent = 'Submitted (Albedo) — ' + (submitRes.hash || 'submitted');
+            } else {
+              txStatus.textContent = 'Albedo did not return signed envelope';
             }
+          } catch (e) {
+            console.error(e); txStatus.textContent = 'Albedo signing failed';
+          }
+        } else if (activeKeypair) {
+          tx.sign(activeKeypair);
+          const txRes = await SERVER.submitTransaction(tx);
+          txStatus.textContent = 'Submitted — ' + txRes.hash;
         }
 
-        function generateSellOrders() {
-            const sellOrdersDiv = document.getElementById('sellOrders');
-            sellOrdersDiv.innerHTML = '';
-            
-            const basePrice = 142.35;
-            for (let i = 0; i < 8; i++) {
-                const price = generateRandomPrice(basePrice + (i * 0.5), 0.3);
-                const amount = generateRandomAmount();
-                const total = (price * amount).toFixed(2);
-                const trader = generateTraderName();
-                
-                const orderRow = document.createElement('div');
-                orderRow.className = 'order-row';
-                orderRow.innerHTML = `
-                    <span class="price">$${price}</span>
-                    <span class="amount">${amount}</span>
-                    <span class="total">$${total}</span>
-                    <span class="trader">${trader}</span>
-                `;
-                sellOrdersDiv.appendChild(orderRow);
-            }
-        }
+        // refresh orderbook & trades
+        await loadOrderbook();
+        await loadTrades();
 
-        function generateRecentTrades() {
-            const tradesDiv = document.getElementById('recentTrades');
-            tradesDiv.innerHTML = '';
-            
-            const basePrice = 142.35;
-            for (let i = 0; i < 10; i++) {
-                const price = generateRandomPrice(basePrice, 2);
-                const amount = generateRandomAmount();
-                const type = Math.random() > 0.5 ? 'BUY' : 'SELL';
-                const time = new Date(Date.now() - i * 60000).toLocaleTimeString();
-                
-                const tradeRow = document.createElement('div');
-                tradeRow.className = 'trade-row';
-                tradeRow.innerHTML = `
-                    <span>${time}</span>
-                    <span class="trade-price ${type === 'BUY' ? 'trade-buy' : 'trade-sell'}">$${price}</span>
-                    <span>${amount}</span>
-                    <span class="${type === 'BUY' ? 'trade-buy' : 'trade-sell'}">${type}</span>
-                `;
-                tradesDiv.appendChild(tradeRow);
-            }
-        }
+      } catch (e) {
+        console.error(e);
+        txStatus.textContent = 'Error: ' + (e.response && e.response.data ? JSON.stringify(e.response.data) : e.message);
+      }
+    };
 
-        function updateStats() {
-            const currentPrice = generateRandomPrice(142.35, 1);
-            const volume = (Math.random() * 1000000 + 1000000).toFixed(1);
-            const change = (Math.random() * 10 - 5).toFixed(1);
-            const orders = Math.floor(Math.random() * 20 + 30);
-            
-            document.getElementById('currentPrice').textContent = `$${currentPrice}`;
-            document.getElementById('volume24h').textContent = `$${(volume/1000000).toFixed(1)}M`;
-            document.getElementById('change24h').textContent = `${change > 0 ? '+' : ''}${change}%`;
-            document.getElementById('change24h').style.color = change > 0 ? '#2d6b3d' : '#d4691a';
-            document.getElementById('activeOrders').textContent = orders;
-        }
-
-        function refreshData() {
-            generateBuyOrders();
-            generateSellOrders();
-            generateRecentTrades();
-            updateStats();
-        }
-
-        // Initialize data on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            refreshData();
-            
-            // Auto-refresh every 10 seconds
-            setInterval(refreshData, 10000);
+    // ----- Recent trades -----
+    async function loadTrades(){
+      tradesEl.innerHTML = 'Loading...';
+      try{
+        const path = `${HORIZON}/trades?offer_asset_type=credit_alphanum4&offer_asset_code=${LAAM_CODE}&offer_asset_issuer=${LAAM_ISSUER}&limit=20&order=desc`;
+        const res = await fetch(path);
+        const data = await res.json();
+        tradesEl.innerHTML = '';
+        if (!data._embedded || !data._embedded.records || data._embedded.records.length===0){ tradesEl.textContent = '—'; return; }
+        data._embedded.records.forEach(r => {
+          const div = document.createElement('div');
+          div.innerHTML = `ID:${r.id} — Price:${r.price} — Base:${r.base_amount} ${r.base_asset_code||'XLM'} — Counter:${r.counter_amount} ${r.counter_asset_code||'XLM'}`;
+          tradesEl.appendChild(div);
         });
+      }catch(e){ console.error(e); tradesEl.textContent='Failed to load'; }
+    }
 
-        // Add click handlers for orders
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.order-row')) {
-                const row = e.target.closest('.order-row');
-                const price = row.querySelector('.price').textContent;
-                const amount = row.querySelector('.amount').textContent;
-                alert(`Order selected:\nPrice: ${price}\nAmount: ${amount}\n\nIn a real application, this would open a trading interface.`);
-            }
-        });
-    </script>
-</body>
+    loadTrades();
+
+    // friendly note if albedo library not present
+    if (!window.albedo) {
+      console.warn('Albedo library not found — Albedo connect/buttons will not work in this environment');
+    }
+
+  </script></body>
 </html>
-
-  
