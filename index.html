@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Laam DEX - Laam/XLM Only</title>
+<title>Laam DEX - Laam/XLM Trading with Trustline</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -25,6 +25,10 @@
     color: #071422;
     font-weight: bold;
     cursor: pointer;
+  }
+  button:disabled {
+    background: #999;
+    cursor: not-allowed;
   }
   table {
     width: 100%;
@@ -50,11 +54,12 @@
 </style>
 </head>
 <body>
-<h1>Laam DEX - Laam/XLM Trading</h1>
+<h1>Laam DEX - Laam/XLM Trading with Trustline</h1>
 <p><strong>Secret Key:</strong></p>
 <input type="password" id="secretKeyInput" placeholder="Enter your Stellar secret key" />
 <button id="loadAccountBtn">Load Account</button>
 <p id="accountPubKey">Public Key: -</p>
+<button id="addTrustlineBtn" disabled>Add Trustline for Laam</button>
 
 <hr />
 
@@ -101,6 +106,7 @@
   const secretInput = document.getElementById('secretKeyInput');
   const loadBtn = document.getElementById('loadAccountBtn');
   const pubKeyDisplay = document.getElementById('accountPubKey');
+  const addTrustlineBtn = document.getElementById('addTrustlineBtn');
   const tradePairSelect = document.getElementById('tradePair');
   const amountInput = document.getElementById('tradeAmount');
   const priceInput = document.getElementById('tradePrice');
@@ -111,6 +117,7 @@
   const amountLabel = document.getElementById('amountLabel');
 
   let activeKeypair = null;
+  let accountData = null;
 
   function updateAmountLabel() {
     const val = tradePairSelect.value;
@@ -127,6 +134,11 @@
     statusMsg.textContent = '';
   }
 
+  function clearOffers() {
+    buyOffersTbody.innerHTML = '';
+    sellOffersTbody.innerHTML = '';
+  }
+
   async function loadAccount() {
     const secret = secretInput.value.trim();
     if (!secret) {
@@ -136,12 +148,67 @@
     try {
       activeKeypair = StellarSdk.Keypair.fromSecret(secret);
       pubKeyDisplay.textContent = 'Public Key: ' + activeKeypair.publicKey();
+      statusMsg.textContent = 'Loading account data...';
+      accountData = await server.loadAccount(activeKeypair.publicKey());
       statusMsg.textContent = 'Account loaded successfully.';
+      addTrustlineBtn.disabled = false;
+      fetchOrderbook();
     } catch (e) {
-      alert('Invalid secret key.');
+      alert('Invalid secret key or unable to load account.');
       statusMsg.textContent = '';
       activeKeypair = null;
+      accountData = null;
       pubKeyDisplay.textContent = 'Public Key: -';
+      addTrustlineBtn.disabled = true;
+      clearOffers();
+    }
+  }
+
+  async function addTrustline() {
+    if (!activeKeypair || !accountData) {
+      alert('Load your account first.');
+      return;
+    }
+
+    // Check if trustline already exists
+    const trustlineExists = accountData.balances.some(
+      (bal) =>
+        bal.asset_code === LAAM.code &&
+        bal.asset_issuer === LAAM.issuer
+    );
+    if (trustlineExists) {
+      alert('Trustline for Laam already exists.');
+      return;
+    }
+
+    try {
+      statusMsg.textContent = 'Submitting trustline transaction...';
+
+      const fee = await server.fetchBaseFee();
+
+      const transaction = new StellarSdk.TransactionBuilder(accountData, {
+        fee,
+        networkPassphrase: StellarSdk.Networks.PUBLIC,
+      })
+        .addOperation(
+          StellarSdk.Operation.changeTrust({
+            asset: LAAM,
+          })
+        )
+        .setTimeout(30)
+        .build();
+
+      transaction.sign(activeKeypair);
+
+      const txResult = await server.submitTransaction(transaction);
+
+      statusMsg.textContent = 'Trustline added successfully! Tx Hash: ' + txResult.hash;
+
+      // Reload account data after trustline added
+      accountData = await server.loadAccount(activeKeypair.publicKey());
+    } catch (err) {
+      console.error(err);
+      statusMsg.textContent = 'Error adding trustline: ' + err.message;
     }
   }
 
@@ -258,12 +325,8 @@
     }
   }
 
-  function clearOffers() {
-    buyOffersTbody.innerHTML = '';
-    sellOffersTbody.innerHTML = '';
-  }
-
   loadBtn.addEventListener('click', loadAccount);
+  addTrustlineBtn.addEventListener('click', addTrustline);
   placeOfferBtn.addEventListener('click', placeOffer);
 
   // Initialize
