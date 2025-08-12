@@ -1,449 +1,259 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>LAAM DEX — Laam / XLM / USDC</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #071421;
-      --card: #0b1220;
-      --muted: #9aa4b2;
-      --accent: #ffd36b;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: Inter, system-ui, Arial;
-      margin: 0;
-      background: linear-gradient(180deg, #071021, #081427);
-      color: #e6eef6;
-      padding: 28px;
-    }
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
-    .title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #14213d, #1e2b4a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: var(--accent);
-      box-shadow: 0 8px 24px rgba(5, 8, 12, 0.6);
-      user-select: none;
-    }
-    h1 {
-      font-size: 20px;
-      margin: 0;
-    }
-    p.lead {
-      color: var(--muted);
-      margin: 0;
-      font-size: 13px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 16px;
-    }
-    .card {
-      background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.02),
-        rgba(255, 255, 255, 0.015)
-      );
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      padding: 14px;
-      border-radius: 12px;
-    }
-    label {
-      display: block;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-    input,
-    select,
-    button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      background: transparent;
-      color: inherit;
-      font-size: 15px;
-    }
-    input:focus,
-    select:focus,
-    button:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 6px var(--accent);
-    }
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .warn {
-      background: #2b1a07;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 210, 107, 0.08);
-      color: #ffe9bf;
-      font-size: 13px;
-    }
-    .row {
-      display: flex;
-      gap: 12px;
-    }
-    .col {
-      flex: 1;
-    }
-    .small {
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .btn-primary {
-      background: linear-gradient(90deg, #ffd36b, #ffb86b);
-      border: none;
-      color: #071422;
-      font-weight: 700;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-    }
-    .btn-primary:hover {
-      background: #ffce3c;
-    }
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      font-weight: 700;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-    }
-    .btn-secondary:hover {
-      background: rgba(255, 211, 107, 0.15);
-    }
-    .rate-box {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .rate-box > div {
-      flex: 1;
-    }
-    pre {
-      background: #06121a;
-      padding: 10px;
-      border-radius: 8px;
-      overflow: auto;
-      color: var(--muted);
-      max-height: 160px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    th,
-    td {
-      padding: 6px 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-      text-align: right;
-      user-select: text;
-    }
-    th {
-      text-align: left;
-      color: var(--accent);
-    }
-    caption {
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 6px;
-      text-align: left;
-      font-size: 15px;
-    }
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laam DEX Prototype</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #071421;
+    color: #e6eef6;
+    margin: 20px;
+  }
+  input, select, button {
+    font-size: 16px;
+    padding: 8px;
+    margin: 6px 0;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 6px;
+    border: none;
+  }
+  button {
+    background: #ffd36b;
+    color: #071422;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  table {
+    width: 100%;
+    max-width: 600px;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  th, td {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+    text-align: right;
+  }
+  th {
+    color: #ffd36b;
+    text-align: left;
+  }
+  caption {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #ffd36b;
+    text-align: left;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="title">
-        <div class="logo">LA</div>
-        <div>
-          <h1>Laam DEX</h1>
-          <p class="lead">Trade: XLM ⇄ Laam and USDC ⇄ Laam (prototype). Secret-key only.</p>
-        </div>
-      </div>
-      <div class="small">Network: <strong>Stellar Public</strong></div>
-    </header>
+<h1>Laam DEX Prototype</h1>
+<p><strong>Secret Key:</strong></p>
+<input type="password" id="secretKeyInput" placeholder="Enter your Stellar secret key" />
+<button id="loadAccountBtn">Load Account</button>
+<p id="accountPubKey">Public Key: -</p>
 
-    <div class="grid">
-      <main>
-        <div class="card">
-          <h3>1. Access — Secret Key</h3>
-          <div class="warn">
-            ⚠️ Testing only. Never paste production keys on unknown pages. Secret key stays in browser memory only.
-          </div>
-          <label for="secretInput">Secret key</label>
-          <input id="secretInput" placeholder="S... (secret key)" autocomplete="off" />
-          <div style="display: flex; gap: 10px; margin-top: 8px">
-            <button id="btnUseSecret" class="btn-primary">Use Secret Key</button>
-            <button id="btnClear" class="btn-secondary">Clear</button>
-          </div>
-          <p class="small">
-            Public Key: <span id="pubKey">—</span>
-          </p>
-        </div>
+<hr />
 
-        <div class="card" style="margin-top: 12px">
-          <h3>2. Rates & Quick Actions</h3>
-          <div class="rate-box" style="justify-content: space-between">
-            <div>
-              <div class="small">Orderbook price (XLM per Laam)</div>
-              <div id="priceXLM" style="font-weight: 700">—</div>
-            </div>
-            <div>
-              <div class="small">XLM → USD</div>
-              <div id="xlmUsd" style="font-weight: 700">—</div>
-            </div>
-            <div>
-              <div class="small">1 Laam → USDC (est.)</div>
-              <div id="laamUsdc" style="font-weight: 700">—</div>
-            </div>
-          </div>
+<h2>Trade Pairs</h2>
+<select id="tradePair">
+  <option value="xlm_to_laam">XLM → Laam</option>
+  <option value="usdc_to_laam">USDC → Laam</option>
+  <option value="laam_to_usdc">Laam → USDC</option>
+</select>
 
-          <div style="display: flex; gap: 8px; margin-bottom: 8px">
-            <button id="btnRefreshRates" class="btn-primary">Refresh Rates</button>
-            <div class="small">Auto refresh every 30s</div>
-          </div>
+<p>
+  Amount:<br />
+  <input type="number" id="tradeAmount" placeholder="Enter amount" min="0" step="any" />
+</p>
+<p>
+  Price (XLM per Laam, optional):<br />
+  <input type="number" id="tradePrice" placeholder="Leave empty for market price" min="0" step="any" />
+</p>
+<button id="placeOfferBtn">Place Offer (Test)</button>
 
-          <div style="display: flex; gap: 8px">
-            <button id="btnQuickBuyXlm" class="btn-primary">Quick: Buy Laam with XLM</button>
-            <button id="btnQuickSellXlm" class="btn-primary">Quick: Sell Laam for XLM</button>
-          </div>
-        </div>
+<hr />
 
-        <div class="card" style="margin-top: 12px">
-          <h3>3. Trade (select pair)</h3>
-          <label for="tradeType">Pair</label>
-          <select id="tradeType">
-            <option value="xlm_to_laam">XLM → Laam</option>
-            <option value="usdc_to_laam">USDC → Laam</option>
-            <option value="laam_to_usdc">Laam → USDC</option>
-          </select>
+<h2>Market Offers</h2>
+<table>
+  <caption>Buy Offers (Bids)</caption>
+  <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
+  <tbody id="buyOffers"></tbody>
+</table>
 
-          <label id="amountLabel" for="amount">Amount (XLM)</label>
-          <input id="amount" placeholder="e.g. 10" />
+<table>
+  <caption>Sell Offers (Asks)</caption>
+  <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
+  <tbody id="sellOffers"></tbody>
+</table>
 
-          <label for="price">Price (XLM per Laam) — leave empty to use market/orderbook price</label>
-          <input id="price" placeholder="e.g. 0.5" />
+<p id="statusMsg"></p>
 
-          <div style="display: flex; gap: 8px; margin-top: 10px">
-            <button id="btnCreateOffer" class="btn-primary">Place Offer</button>
-            <button id="btnReset" class="btn-secondary">Reset</button>
-          </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/8.2.3/stellar-sdk.min.js"></script>
+<script>
+  const server = new StellarSdk.Server('https://horizon.stellar.org');
+  const LAAM_CODE = 'Laam';
+  const LAAM_ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
 
-          <p id="txStatus" class="small">&nbsp;</p>
+  let activeKeypair = null;
 
-          <section id="offersSection" style="margin-top:20px;">
-            <h4>Market Offers</h4>
-            <div style="display:flex; gap:16px; flex-wrap: wrap;">
-              <div style="flex:1; min-width: 160px;">
-                <table>
-                  <caption>Buy Offers (Bids)</caption>
-                  <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
-                  <tbody id="buyOffers"></tbody>
-                </table>
-              </div>
-              <div style="flex:1; min-width: 160px;">
-                <table>
-                  <caption>Sell Offers (Asks)</caption>
-                  <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
-                  <tbody id="sellOffers"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
+  const secretInput = document.getElementById('secretKeyInput');
+  const loadBtn = document.getElementById('loadAccountBtn');
+  const pubKeyDisplay = document.getElementById('accountPubKey');
+  const tradePairSelect = document.getElementById('tradePair');
+  const amountInput = document.getElementById('tradeAmount');
+  const priceInput = document.getElementById('tradePrice');
+  const placeOfferBtn = document.getElementById('placeOfferBtn');
+  const buyOffersTbody = document.getElementById('buyOffers');
+  const sellOffersTbody = document.getElementById('sellOffers');
+  const statusMsg = document.getElementById('statusMsg');
 
-      <aside>
-        <div class="card">
-          <h4>Pair Info</h4>
-          <p class="small">
-            Asset: <strong>Laam</strong> — Issuer: <code>GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64</code>
-          </p>
-          <p class="small">
-            Note: USDC trades may require off-chain settlement for fiat on/off ramps — this UI sends Stellar offers only.
-          </p>
-        </div>
-
-        <div class="card" style="display:none;">
-          <h4>Debug / Raw</h4>
-          <pre id="raw">—</pre>
-        </div>
-      </aside>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/8.2.3/stellar-sdk.min.js"></script>
-  <script>
-    /* Config */
-    const HORIZON = 'https://horizon.stellar.org';
-    const SERVER = new StellarSdk.Server(HORIZON);
-    const LAAM_CODE = 'Laam';
-    const LAAM_ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
-    const FIAT = 'USDC'; // display fiat as USDC
-
-    /* Elements */
-    const secretInput = document.getElementById('secretInput');
-    const btnUseSecret = document.getElementById('btnUseSecret');
-    const btnClear = document.getElementById('btnClear');
-    const pubKeyEl = document.getElementById('pubKey');
-    const priceXlmEl = document.getElementById('priceXLM');
-    const xlmUsdEl = document.getElementById('xlmUsd');
-    const laamUsdcEl = document.getElementById('laamUsdc');
-    const btnRefreshRates = document.getElementById('btnRefreshRates');
-    const btnCreateOffer = document.getElementById('btnCreateOffer');
-    const btnReset = document.getElementById('btnReset');
-    const tradeTypeEl = document.getElementById('tradeType');
-    const amountEl = document.getElementById('amount');
-    const priceEl = document.getElementById('price');
-    const amountLabel = document.getElementById('amountLabel');
-    const txStatus = document.getElementById('txStatus');
-    const buyOffersTbody = document.getElementById('buyOffers');
-    const sellOffersTbody = document.getElementById('sellOffers');
-    const rawEl = document.getElementById('raw');
-    const btnQuickBuyXlm = document.getElementById('btnQuickBuyXlm');
-    const btnQuickSellXlm = document.getElementById('btnQuickSellXlm');
-
-    let activeKeypair = null;
-    let cached = { xlm_usd: null, price_xlm_per_laam: null };
-
-    /* Wallet handlers */
-    btnUseSecret.onclick = () => {
-      const s = secretInput.value.trim();
-      try {
-        if (!s) throw new Error('No secret');
-        const kp = StellarSdk.Keypair.fromSecret(s);
-        activeKeypair = kp;
-        pubKeyEl.textContent = kp.publicKey();
-        txStatus.textContent = 'Secret loaded (in-memory)';
-      } catch (e) {
-        alert('Invalid secret key');
-      }
-    };
-    btnClear.onclick = () => {
-      secretInput.value = '';
-      activeKeypair = null;
-      pubKeyEl.textContent = '—';
-      txStatus.textContent = 'Cleared';
-    };
-
-    /* Fetch orderbook price (XLM per Laam) */
-    async function fetchOrderbookPrice() {
-      try {
-        const url = `${HORIZON}/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_CODE}&selling_asset_issuer=${LAAM_ISSUER}&buying_asset_type=native`;
-        const res = await fetch(url);
-        const ob = await res.json();
-        rawEl.textContent = JSON.stringify(ob, null, 2);
-
-        const bestAsk = ob.asks && ob.asks.length ? parseFloat(ob.asks[0].price) : null;
-        const bestBid = ob.bids && ob.bids.length ? parseFloat(ob.bids[0].price) : null;
-        let mid = null;
-        if (bestAsk && bestBid) mid = (bestAsk + bestBid) / 2;
-        else if (bestAsk) mid = bestAsk;
-        else if (bestBid) mid = bestBid;
-        cached.price_xlm_per_laam = mid;
-        priceXlmEl.textContent = mid ? mid.toFixed(7) : '—';
-
-        // Update offers tables:
-        populateOffers(ob.bids, buyOffersTbody);
-        populateOffers(ob.asks, sellOffersTbody);
-
-        return mid;
-      } catch (e) {
-        console.error(e);
-        rawEl.textContent = e.message;
-        clearOffers();
-        return null;
-      }
+  async function loadAccount() {
+    const secret = secretInput.value.trim();
+    if (!secret) {
+      alert('Please enter your secret key');
+      return;
     }
+    try {
+      activeKeypair = StellarSdk.Keypair.fromSecret(secret);
+      pubKeyDisplay.textContent = 'Public Key: ' + activeKeypair.publicKey();
+      statusMsg.textContent = 'Account loaded successfully.';
+    } catch (e) {
+      alert('Invalid secret key.');
+      statusMsg.textContent = '';
+      activeKeypair = null;
+      pubKeyDisplay.textContent = 'Public Key: -';
+    }
+  }
 
-    function clearOffers() {
+  async function fetchOrderbook() {
+    try {
+      const url = `https://horizon.stellar.org/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_CODE}&selling_asset_issuer=${LAAM_ISSUER}&buying_asset_type=native`;
+      const res = await fetch(url);
+      const orderbook = await res.json();
+
+      // Buy offers = bids
+      buyOffersTbody.innerHTML = '';
+      if (orderbook.bids.length === 0) {
+        buyOffersTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#777;">-</td></tr>';
+      } else {
+        orderbook.bids.forEach((bid) => {
+          const price = parseFloat(bid.price);
+          const amount = parseFloat(bid.amount);
+          const total = price * amount;
+          buyOffersTbody.innerHTML += `<tr><td>${price.toFixed(7)}</td><td>${amount.toFixed(7)}</td><td>${total.toFixed(7)}</td></tr>`;
+        });
+      }
+
+      // Sell offers = asks
+      sellOffersTbody.innerHTML = '';
+      if (orderbook.asks.length === 0) {
+        sellOffersTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#777;">-</td></tr>';
+      } else {
+        orderbook.asks.forEach((ask) => {
+          const price = parseFloat(ask.price);
+          const amount = parseFloat(ask.amount);
+          const total = price * amount;
+          sellOffersTbody.innerHTML += `<tr><td>${price.toFixed(7)}</td><td>${amount.toFixed(7)}</td><td>${total.toFixed(7)}</td></tr>`;
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      statusMsg.textContent = 'Failed to fetch orderbook.';
       buyOffersTbody.innerHTML = '';
       sellOffersTbody.innerHTML = '';
     }
+  }
 
-    function populateOffers(offers, tbody) {
-      tbody.innerHTML = '';
-      if (!offers || offers.length === 0) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 3;
-        td.style.textAlign = 'center';
-        td.style.color = '#777';
-        td.textContent = '—';
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
-      }
-      offers.forEach((offer) => {
-        const tr = document.createElement('tr');
-        // price, amount (Laam), total (XLM)
-        const price = parseFloat(offer.price);
-        const amount = parseFloat(offer.amount);
-        const total = price * amount;
-
-        tr.innerHTML = `
-          <td>${price.toFixed(7)}</td>
-          <td>${amount.toFixed(7)}</td>
-          <td>${total.toFixed(7)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+  async function placeOffer() {
+    if (!activeKeypair) {
+      alert('Load your secret key first.');
+      return;
     }
 
-    /* Fetch XLM price in USD via CoinGecko */
-    async function fetchFiatRates() {
-      try {
-        const cg = await fetch(
-          'https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd'
-        ).then((r) => r.json());
-        const xlmUsd = cg.stellar && cg.stellar.usd ? cg.stellar.usd : null;
-        cached.xlm_usd = xlmUsd;
-        xlmUsdEl.textContent = xlmUsd ? xlmUsd.toFixed(6) + ' USD' : '—';
+    const amount = parseFloat(amountInput.value);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Enter a valid amount.');
+      return;
+    }
 
-        // compute 1 Laam in USDC if we have orderbook price
-        const px = cached.price_xlm_per_laam;
-        if (xlmUsd &&
+    let price = priceInput.value.trim();
+    if (price === '') {
+      // Use market price (best ask if selling Laam, best bid if buying Laam)
+      // For simplicity, just reject here
+      alert('Please enter price for now.');
+      return;
+    }
+    price = parseFloat(price);
+    if (isNaN(price) || price <= 0) {
+      alert('Enter a valid price.');
+      return;
+    }
+
+    const tradeType = tradePairSelect.value;
+
+    try {
+      const account = await server.loadAccount(activeKeypair.publicKey());
+      const fee = await server.fetchBaseFee();
+
+      let sellingAsset, buyingAsset;
+
+      if (tradeType === 'xlm_to_laam') {
+        sellingAsset = StellarSdk.Asset.native();
+        buyingAsset = new StellarSdk.Asset(LAAM_CODE, LAAM_ISSUER);
+      } else if (tradeType === 'usdc_to_laam') {
+        sellingAsset = new StellarSdk.Asset('USDC', 'GA5ZSEJY5E3PXZ7XPYH2Z7DDPAU6LKFQZC5BRXEYFQJJKR5YQ6MFNNH7'); // Example USDC issuer on Stellar mainnet
+        buyingAsset = new StellarSdk.Asset(LAAM_CODE, LAAM_ISSUER);
+      } else if (tradeType === 'laam_to_usdc') {
+        sellingAsset = new StellarSdk.Asset(LAAM_CODE, LAAM_ISSUER);
+        buyingAsset = new StellarSdk.Asset('USDC', 'GA5ZSEJY5E3PXZ7XPYH2Z7DDPAU6LKFQZC5BRXEYFQJJKR5YQ6MFNNH7');
+      } else {
+        alert('Unsupported trade pair.');
+        return;
+      }
+
+      const orderbook = await server.orderbook(sellingAsset, buyingAsset).call();
+
+      const transaction = new StellarSdk.TransactionBuilder(account, {
+        fee,
+        networkPassphrase: StellarSdk.Networks.PUBLIC,
+      })
+        .addOperation(
+          StellarSdk.Operation.manageSellOffer({
+            selling: sellingAsset,
+            buying: buyingAsset,
+            amount: amount.toFixed(7),
+            price: price.toString(),
+            offerId: '0',
+          })
+        )
+        .setTimeout(30)
+        .build();
+
+      transaction.sign(activeKeypair);
+
+      statusMsg.textContent = 'Submitting transaction...';
+
+      const txResult = await server.submitTransaction(transaction);
+      statusMsg.textContent = 'Offer placed successfully. Tx Hash: ' + txResult.hash;
+
+      // Refresh orderbook after offer
+      await fetchOrderbook();
+    } catch (err) {
+      console.error(err);
+      statusMsg.textContent = 'Error placing offer: ' + err.message;
+    }
+  }
+
+  loadBtn.addEventListener('click', loadAccount);
+  placeOfferBtn.addEventListener('click', placeOffer);
+
+  // Fetch orderbook on load and every 30 seconds
+  fetchOrderbook();
+  setInterval(fetchOrderbook, 30000);
+</script>
+</body>
+</html>
