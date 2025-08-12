@@ -53,7 +53,7 @@
 <h1>Laam DEX - Laam/XLM Trading</h1>
 <p><strong>Secret Key:</strong></p>
 <input type="password" id="secretKeyInput" placeholder="Enter your Stellar secret key" />
-<button id="loadAccountBtn">inter secret Key</button>
+<button id="loadAccountBtn">Load Account</button>
 <p id="accountPubKey">Public Key: -</p>
 
 <hr />
@@ -263,7 +263,7 @@
     sellOffersTbody.innerHTML = '';
   }
 
-  loadBtn.addEventListener('click', LoadAccount);
+  loadBtn.addEventListener('click', loadAccount);
   placeOfferBtn.addEventListener('click', placeOffer);
 
   // Initialize
