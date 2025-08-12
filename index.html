@@ -1,42 +1,324 @@
-<!DOCTYPE html><html>
+<!doctype html>
+
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Laam DEX</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LAAM DEX — Laam / XLM / Fiat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; text-align: center; padding: 20px; }
-    h1 { color: #333; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-    input, select, button { padding: 10px; margin: 10px 0; width: 90%; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background: #45a049; }
+    :root{--bg:#071421;--card:#0b1220;--muted:#9aa4b2;--accent:#ffd36b}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial;margin:0;background:linear-gradient(180deg,#071021,#081427);color:#e6eef6;padding:28px}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .title{display:flex;align-items:center;gap:12px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#14213d,#1e2b4a);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);box-shadow:0 8px 24px rgba(5,8,12,0.6)}
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin:0;font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));border:1px solid rgba(255,255,255,0.04);padding:14px;border-radius:12px}
+    label{display:block;color:var(--muted);margin-top:8px}
+    input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .muted{color:var(--muted);font-size:13px}
+    .warn{background:#2b1a07;padding:10px;border-radius:8px;border:1px solid rgba(255,210,107,0.08);color:#ffe9bf;font-size:13px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    .small{font-size:13px;color:var(--muted)}
+    .btn-primary{background:linear-gradient(90deg,#ffd36b,#ffb86b);border:none;color:#071422;font-weight:700;padding:10px;border-radius:8px}
+    .rate-box{display:flex;gap:8px;align-items:center}
+    pre{background:#06121a;padding:10px;border-radius:8px;overflow:auto;color:var(--muted);max-height:160px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <h1>Laam DEX</h1>
-  <div class="card">
-    <h2>Enter Secret Key</h2>
-    <input type="password" id="secretKey" placeholder="Your Stellar Secret Key"><h3>Trade Options</h3>
-<select id="tradeType">
-  <option value="xlm_to_laam">XLM → Laam</option>
-  <option value="fiat_to_laam">Fiat → Laam</option>
-  <option value="laam_to_fiat">Laam → Fiat</option>
-</select>
+  <div class="container">
+    <header>
+      <div class="title">
+        <div class="logo">LA</div>
+        <div>
+          <h1>Laam DEX</h1>
+          <p class="lead">Trade: XLM ⇄ Laam and Fiat ⇄ Laam (prototype). Secret-key only.</p>
+        </div>
+      </div>
+      <div class="small">Network: <strong>Stellar Public</strong></div>
+    </header><div class="grid">
+  <main>
+    <div class="card">
+      <h3>1. Access — Secret Key</h3>
+      <div class="warn">⚠️ Testing only. Never paste production keys on unknown pages. Secret key stays in browser memory only.</div>
+      <label>Secret key</label>
+      <input id="secretInput" placeholder="S... (secret key)" autocomplete="off" />
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button id="btnUseSecret" class="btn-primary">Use Secret Key</button>
+        <button id="btnClear">Clear</button>
+      </div>
+      <p class="small">Public Key: <span id="pubKey">—</span></p>
+    </div>
 
-<input type="number" id="amount" placeholder="Amount">
-<button onclick="placeTrade()">Place Trade</button>
+    <div class="card" style="margin-top:12px">
+      <h3>2. Rates & Quick Actions</h3>
+      <div class="rate-box" style="justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div class="small">Orderbook price (XLM per Laam)</div>
+          <div id="priceXLM" style="font-weight:700">—</div>
+        </div>
+        <div>
+          <div class="small">XLM → USD</div>
+          <div id="xlmUsd" style="font-weight:700">—</div>
+        </div>
+        <div>
+          <div class="small">1 Laam → Fiat (ETB)</div>
+          <div id="laamEtb" style="font-weight:700">—</div>
+        </div>
+      </div>
 
-  </div>  <script>
-    function placeTrade() {
-      const secret = document.getElementById('secretKey').value.trim();
-      const type = document.getElementById('tradeType').value;
-      const amount = parseFloat(document.getElementById('amount').value);
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button id="btnRefreshRates">Refresh Rates</button>
+        <div class="small">Auto refresh every 30s</div>
+      </div>
 
-      if (!secret || isNaN(amount) || amount <= 0) {
-        alert('Please enter valid details.');
-        return;
-      }
+      <div style="display:flex;gap:8px">
+        <button id="btnQuickBuyXlm" class="btn-primary">Quick: Buy Laam with XLM</button>
+        <button id="btnQuickSellXlm">Quick: Sell Laam for XLM</button>
+      </div>
+    </div>
 
-      alert(`Trade placed: ${type.replace(/_/g, ' ')} | Amount: ${amount}`);
+    <div class="card" style="margin-top:12px">
+      <h3>3. Trade (select pair)</h3>
+      <label>Pair</label>
+      <select id="tradeType">
+        <option value="xlm_to_laam">XLM → Laam</option>
+        <option value="fiat_to_laam">Fiat → Laam</option>
+        <option value="laam_to_fiat">Laam → Fiat</option>
+      </select>
+
+      <label id="amountLabel">Amount (XLM)</label>
+      <input id="amount" placeholder="e.g. 10" />
+
+      <label>Price (XLM per Laam) — leave empty to use market/orderbook price</label>
+      <input id="price" placeholder="e.g. 0.5" />
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="btnCreateOffer" class="btn-primary">Place Offer</button>
+        <button id="btnReset">Reset</button>
+      </div>
+
+      <p id="txStatus" class="small">&nbsp;</p>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>4. Recent Trades</h3>
+      <div id="trades"></div>
+    </div>
+  </main>
+
+  <aside>
+    <div class="card">
+      <h4>Pair Info</h4>
+      <p class="small">Asset: <strong>Laam</strong> — Issuer: <code>GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64</code></p>
+      <p class="small">Note: Fiat trades require off-chain settlement (escrow or bank transfer) — this UI sends Stellar offers only.</p>
+    </div>
+
+    <div class="card">
+      <h4>Debug / Raw</h4>
+      <pre id="raw">—</pre>
+    </div>
+  </aside>
+</div>
+
+  </div>  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/8.2.3/stellar-sdk.min.js"></script>  <script>
+    /* Config */
+    const HORIZON = 'https://horizon.stellar.org';
+    const SERVER = new StellarSdk.Server(HORIZON);
+    const LAAM_CODE = 'Laam';
+    const LAAM_ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
+    const FIAT = 'ETB'; // display fiat
+
+    /* Elements */
+    const secretInput = document.getElementById('secretInput');
+    const btnUseSecret = document.getElementById('btnUseSecret');
+    const btnClear = document.getElementById('btnClear');
+    const pubKeyEl = document.getElementById('pubKey');
+    const priceXlmEl = document.getElementById('priceXLM');
+    const xlmUsdEl = document.getElementById('xlmUsd');
+    const laamEtbEl = document.getElementById('laamEtb');
+    const btnRefreshRates = document.getElementById('btnRefreshRates');
+    const btnCreateOffer = document.getElementById('btnCreateOffer');
+    const btnReset = document.getElementById('btnReset');
+    const tradeTypeEl = document.getElementById('tradeType');
+    const amountEl = document.getElementById('amount');
+    const priceEl = document.getElementById('price');
+    const amountLabel = document.getElementById('amountLabel');
+    const txStatus = document.getElementById('txStatus');
+    const tradesEl = document.getElementById('trades');
+    const rawEl = document.getElementById('raw');
+    const btnQuickBuyXlm = document.getElementById('btnQuickBuyXlm');
+    const btnQuickSellXlm = document.getElementById('btnQuickSellXlm');
+
+    let activeKeypair = null;
+    let cached = {xlm_usd: null, usd_etb: null, price_xlm_per_laam: null};
+
+    /* Wallet handlers */
+    btnUseSecret.onclick = () => {
+      const s = secretInput.value.trim();
+      try{
+        if(!s) throw new Error('No secret');
+        const kp = StellarSdk.Keypair.fromSecret(s);
+        activeKeypair = kp;
+        pubKeyEl.textContent = kp.publicKey();
+        txStatus.textContent = 'Secret loaded (in-memory)';
+      }catch(e){ alert('Invalid secret key'); }
+    };
+    btnClear.onclick = () => { secretInput.value=''; activeKeypair=null; pubKeyEl.textContent='—'; txStatus.textContent='Cleared'; };
+
+    /* Fetch orderbook price (XLM per Laam) */
+    async function fetchOrderbookPrice(){
+      try{
+        const url = `${HORIZON}/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_CODE}&selling_asset_issuer=${LAAM_ISSUER}&buying_asset_type=native`;
+        const res = await fetch(url);
+        const ob = await res.json();
+        rawEl.textContent = JSON.stringify(ob, null, 2);
+        // take best bid (max price in bids) and best ask (min price in asks)
+        const bestAsk = ob.asks && ob.asks.length? parseFloat(ob.asks[0].price) : null;
+        const bestBid = ob.bids && ob.bids.length? parseFloat(ob.bids[0].price) : null;
+        let mid = null;
+        if(bestAsk && bestBid) mid = (bestAsk + bestBid)/2;
+        else if(bestAsk) mid = bestAsk;
+        else if(bestBid) mid = bestBid;
+        cached.price_xlm_per_laam = mid;
+        priceXlmEl.textContent = mid? mid.toFixed(7) : '—';
+        return mid;
+      }catch(e){ console.error(e); rawEl.textContent = e.message; return null; }
     }
+
+    /* Fetch XLM price in USD via CoinGecko and USD->ETB via exchangerate.host */
+    async function fetchFiatRates(){
+      try{
+        // XLM -> USD
+        const cg = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd').then(r=>r.json());
+        const xlmUsd = cg.stellar && cg.stellar.usd? cg.stellar.usd : null;
+        cached.xlm_usd = xlmUsd;
+        xlmUsdEl.textContent = xlmUsd? xlmUsd.toFixed(6) + ' USD' : '—';
+
+        // USD -> ETB
+        const conv = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=' + FIAT).then(r=>r.json());
+        const usdE = conv && conv.rates && conv.rates[FIAT]? conv.rates[FIAT] : null;
+        cached.usd_etb = usdE;
+
+        // compute 1 Laam in ETB if we have orderbook price
+        const px = cached.price_xlm_per_laam;
+        if(xlmUsd && usdE && px){
+          const laamUsd = px * xlmUsd; // XLM per Laam * USD per XLM = USD per Laam
+          const laamEtb = laamUsd * usdE;
+          laamEtbEl.textContent = laamEtb ? laamEtb.toFixed(2) + ' ' + FIAT : '—';
+        } else {
+          laamEtbEl.textContent = '—';
+        }
+
+        return {xlmUsd, usdE};
+      }catch(e){ console.error(e); return null; }
+    }
+
+    async function refreshAll(){
+      txStatus.textContent = 'Refreshing rates...';
+      await fetchOrderbookPrice();
+      await fetchFiatRates();
+      txStatus.textContent = 'Rates updated';
+    }
+
+    btnRefreshRates.onclick = refreshAll;
+    setInterval(refreshAll, 30000);
+    refreshAll();
+
+    /* Update amount label based on pair */
+    tradeTypeEl.onchange = () => {
+      const t = tradeTypeEl.value;
+      if(t==='xlm_to_laam') amountLabel.textContent = 'Amount (XLM)';
+      else if(t==='fiat_to_laam') amountLabel.textContent = `Amount (${FIAT})`;
+      else amountLabel.textContent = 'Amount (Laam)';
+    };
+    tradeTypeEl.dispatchEvent(new Event('change'));
+
+    /* Load recent trades */
+    async function loadTrades(){
+      tradesEl.textContent = 'Loading...';
+      try{
+        const path = `${HORIZON}/trades?offer_asset_type=credit_alphanum4&offer_asset_code=${LAAM_CODE}&offer_asset_issuer=${LAAM_ISSUER}&limit=20&order=desc`;
+        const res = await fetch(path);
+        const data = await res.json();
+        tradesEl.innerHTML = '';
+        if(!data._embedded || !data._embedded.records || data._embedded.records.length===0){ tradesEl.textContent='—'; return; }
+        data._embedded.records.forEach(r => {
+          const div = document.createElement('div');
+          div.style.padding='6px 0';
+          div.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+          div.innerHTML = `ID:${r.id} — Price:${r.price} — Base:${r.base_amount} ${r.base_asset_code||'XLM'} — Counter:${r.counter_amount} ${r.counter_asset_code||'XLM'}`;
+          tradesEl.appendChild(div);
+        });
+      }catch(e){ tradesEl.textContent='Failed to load'; }
+    }
+    loadTrades();
+
+    /* Create Stellar offers depending on trade type
+       - xlm_to_laam: user provides XLM amount -> we'll create manageBuyOffer buying Laam with XLM (buyAmount in Laam calculated)
+       - fiat_to_laam: user provides FIAT amount -> convert to XLM using cached rates then same as above
+       - laam_to_fiat: user provides Laam amount -> create manageSellOffer selling Laam for XLM (later off-chain fiat settlement)
+    */
+    btnCreateOffer.onclick = async () => {
+      txStatus.textContent = '';
+      try{
+        if(!activeKeypair){ alert('Provide secret key first'); return; }
+        const t = tradeTypeEl.value;
+        const rawAmt = amountEl.value.trim();
+        if(!rawAmt || isNaN(Number(rawAmt))){ alert('Enter valid amount'); return; }
+        const amt = Number(rawAmt);
+        let price = priceEl.value.trim();
+        if(price && isNaN(Number(price))){ alert('Price must be numeric'); return; }
+        if(!price) price = cached.price_xlm_per_laam;
+        if(!price){ alert('No price available — refresh rates'); return; }
+
+        const sourcePub = activeKeypair.publicKey();
+        const account = await SERVER.loadAccount(sourcePub);
+        const fee = await SERVER.fetchBaseFee();
+        const txb = new StellarSdk.TransactionBuilder(account, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC });
+        const laamAsset = new StellarSdk.Asset(LAAM_CODE, LAAM_ISSUER);
+
+        if(t==='xlm_to_laam'){
+          // user provided XLM amount; compute how much Laam to buy = xlm_amount / price
+          const xlmAmount = amt;
+          const buyAmountLaam = (xlmAmount / Number(price)).toFixed(7); // buyAmount requires string
+          txb.addOperation(StellarSdk.Operation.manageBuyOffer({ selling: StellarSdk.Asset.native(), buying: laamAsset, buyAmount: buyAmountLaam.toString(), price: price.toString() }));
+          txStatus.textContent = `Creating buy offer: spending ${xlmAmount} XLM to buy ${buyAmountLaam} Laam at price ${price}`;
+        } else if(t==='fiat_to_laam'){
+          // user provided FIAT amount; convert to XLM using cached rates
+          if(!cached.xlm_usd || !cached.usd_etb){ alert('Missing fiat/XLM rates — refresh'); return; }
+          const fiatAmount = amt; // in ETB
+          const usdAmount = fiatAmount / cached.usd_etb;
+          const xlmAmount = usdAmount / cached.xlm_usd;
+          const buyAmountLaam = (xlmAmount / Number(price)).toFixed(7);
+          txb.addOperation(StellarSdk.Operation.manageBuyOffer({ selling: StellarSdk.Asset.native(), buying: laamAsset, buyAmount: buyAmountLaam.toString(), price: price.toString() }));
+          txStatus.textContent = `Creating buy offer from ${fiatAmount} ${FIAT} (~${xlmAmount.toFixed(6)} XLM) to buy ${buyAmountLaam} Laam`;
+        } else if(t==='laam_to_fiat'){
+          // user provided Laam amount; create sell offer selling Laam for XLM
+          const sellLaam = amt.toString();
+          txb.addOperation(StellarSdk.Operation.manageSellOffer({ selling: laamAsset, buying: StellarSdk.Asset.native(), amount: sellLaam, price: price.toString() }));
+          txStatus.textContent = `Creating sell offer: selling ${sellLaam} Laam at ${price} XLM/Laam`;
+        }
+
+        const tx = txb.setTimeout(30).build();
+        tx.sign(activeKeypair);
+        const res = await SERVER.submitTransaction(tx);
+        txStatus.textContent = 'Submitted — ' + (res.hash || 'ok');
+        await fetchOrderbookPrice(); await fetchFiatRates(); await loadTrades();
+      }catch(e){ console.error(e); txStatus.textContent = 'Error: ' + (e.response && e.response.data ? JSON.stringify(e.response.data) : e.message); }
+    };
+
+    btnReset.onclick = () => { amountEl.value=''; priceEl.value=''; txStatus.textContent=''; };
+
+    // Quick buttons prefilling
+    btnQuickBuyXlm.onclick = () => { tradeTypeEl.value='xlm_to_laam'; tradeTypeEl.dispatchEvent(new Event('change')); amountEl.value='1'; priceEl.value=''; };
+    btnQuickSellXlm.onclick = () => { tradeTypeEl.value='laam_to_fiat'; tradeTypeEl.dispatchEvent(new Event('change')); amountEl.value='1'; priceEl.value=''; };
+
   </script></body>
 </html>
