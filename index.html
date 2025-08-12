@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Laam DEX - Full Trade Pairs</title>
+<title>Laam DEX - Laam/XLM Only</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -11,12 +11,12 @@
     color: #e6eef6;
     margin: 20px;
   }
-  input, select, button {
+  input, button {
     font-size: 16px;
     padding: 8px;
     margin: 6px 0;
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     border-radius: 6px;
     border: none;
   }
@@ -28,7 +28,7 @@
   }
   table {
     width: 100%;
-    max-width: 640px;
+    max-width: 600px;
     border-collapse: collapse;
     margin-top: 12px;
   }
@@ -50,30 +50,26 @@
 </style>
 </head>
 <body>
-<h1>Laam DEX Full Trade Pairs</h1>
+<h1>Laam DEX - Laam/XLM Trading</h1>
 <p><strong>Secret Key:</strong></p>
 <input type="password" id="secretKeyInput" placeholder="Enter your Stellar secret key" />
-<button id="loadAccountBtn">Load Account</button>
+<button id="loadAccountBtn">inter secret Key</button>
 <p id="accountPubKey">Public Key: -</p>
 
 <hr />
 
-<h2>Trade Pairs</h2>
+<h2>Trade Direction</h2>
 <select id="tradePair">
-  <option value="xlm_to_laam">XLM → Laam</option>
-  <option value="laam_to_xlm">Laam → XLM</option>
-  <option value="usdc_to_laam">USDC → Laam</option>
-  <option value="laam_to_usdc">Laam → USDC</option>
-  <option value="xlm_to_usdc">XLM → USDC</option>
-  <option value="usdc_to_xlm">USDC → XLM</option>
+  <option value="xlm_to_laam">Buy Laam (Pay XLM)</option>
+  <option value="laam_to_xlm">Sell Laam (Get XLM)</option>
 </select>
 
 <p>
-  Amount (<span id="amountLabel">Source asset</span>):<br />
+  Amount (<span id="amountLabel">XLM</span>):<br />
   <input type="number" id="tradeAmount" placeholder="Enter amount" min="0" step="any" />
 </p>
 <p>
-  Price (in terms of source asset per destination asset, optional):<br />
+  Price (XLM per Laam, optional):<br />
   <input type="number" id="tradePrice" placeholder="Leave empty for market price" min="0" step="any" />
 </p>
 <button id="placeOfferBtn">Place Offer (Test)</button>
@@ -83,13 +79,13 @@
 <h2>Market Offers</h2>
 <table>
   <caption>Buy Offers (Bids)</caption>
-  <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
+  <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
   <tbody id="buyOffers"></tbody>
 </table>
 
 <table>
   <caption>Sell Offers (Asks)</caption>
-  <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
+  <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
   <tbody id="sellOffers"></tbody>
 </table>
 
@@ -99,11 +95,8 @@
 <script>
   const server = new StellarSdk.Server('https://horizon.stellar.org');
 
-  const ASSETS = {
-    xlm: StellarSdk.Asset.native(),
-    laam: new StellarSdk.Asset('Laam', 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64'),
-    usdc: new StellarSdk.Asset('USDC', 'GA5ZSEJY5E3PXZ7XPYH2Z7DDPAU6LKFQZC5BRXEYFQJJKR5YQ6MFNNH7')
-  };
+  const LAAM = new StellarSdk.Asset('Laam', 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64');
+  const XLM = StellarSdk.Asset.native();
 
   const secretInput = document.getElementById('secretKeyInput');
   const loadBtn = document.getElementById('loadAccountBtn');
@@ -121,8 +114,7 @@
 
   function updateAmountLabel() {
     const val = tradePairSelect.value;
-    const sourceAsset = val.split('_to_')[0].toUpperCase();
-    amountLabel.textContent = sourceAsset;
+    amountLabel.textContent = val === 'xlm_to_laam' ? 'XLM' : 'Laam';
   }
 
   tradePairSelect.addEventListener('change', () => {
@@ -156,10 +148,14 @@
   async function fetchOrderbook() {
     clearOffers();
     clearStatus();
-    const val = tradePairSelect.value;
-    const [sellingCode, buyingCode] = val.split('_to_');
-    const sellingAsset = ASSETS[sellingCode];
-    const buyingAsset = ASSETS[buyingCode];
+    let sellingAsset, buyingAsset;
+    if (tradePairSelect.value === 'xlm_to_laam') {
+      sellingAsset = XLM;
+      buyingAsset = LAAM;
+    } else {
+      sellingAsset = LAAM;
+      buyingAsset = XLM;
+    }
 
     try {
       const ob = await server.orderbook(sellingAsset, buyingAsset).call();
@@ -198,7 +194,7 @@
 
   async function placeOffer() {
     if (!activeKeypair) {
-      alert('inter your secret key first.');
+      alert('Load your secret key first.');
       return;
     }
 
@@ -219,10 +215,14 @@
       return;
     }
 
-    const val = tradePairSelect.value;
-    const [sellingCode, buyingCode] = val.split('_to_');
-    const sellingAsset = ASSETS[sellingCode];
-    const buyingAsset = ASSETS[buyingCode];
+    let sellingAsset, buyingAsset;
+    if (tradePairSelect.value === 'xlm_to_laam') {
+      sellingAsset = XLM;
+      buyingAsset = LAAM;
+    } else {
+      sellingAsset = LAAM;
+      buyingAsset = XLM;
+    }
 
     try {
       const account = await server.loadAccount(activeKeypair.publicKey());
@@ -263,18 +263,12 @@
     sellOffersTbody.innerHTML = '';
   }
 
-  loadBtn.addEventListener('click', loadAccount);
+  loadBtn.addEventListener('click', LoadAccount);
   placeOfferBtn.addEventListener('click', placeOffer);
 
   // Initialize
   updateAmountLabel();
   fetchOrderbook();
-
-  tradePairSelect.addEventListener('change', () => {
-    updateAmountLabel();
-    fetchOrderbook();
-    clearStatus();
-  });
 </script>
 </body>
 </html>
