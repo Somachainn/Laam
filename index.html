@@ -1,262 +1,42 @@
-<!doctype html>
-
-<html lang="en">
+<!DOCTYPE html><html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Laam & XLM — Simple Stellar P2P</title>
+  <meta charset="UTF-8">
+  <title>Laam DEX</title>
   <style>
-    body{font-family:Inter, Roboto, Arial;max-width:980px;margin:18px auto;padding:12px}
-    .card{border:1px solid #e6e6e6;border-radius:8px;padding:14px;margin-bottom:12px}
-    label{display:block;margin-top:8px}
-    input,select,button{padding:8px;margin-top:6px;width:100%;box-sizing:border-box}
-    .row{display:flex;gap:12px}
-    .col{flex:1}
-    pre{background:#f7f7f7;padding:10px;border-radius:6px;overflow:auto}
-    .warn{background:#fff4e5;border:1px solid #ffd7a8;padding:8px;border-radius:6px}
+    body { font-family: Arial, sans-serif; background: #f5f5f5; text-align: center; padding: 20px; }
+    h1 { color: #333; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+    input, select, button { padding: 10px; margin: 10px 0; width: 90%; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
   </style>
 </head>
 <body>
-  <h1>Laam ↔ XLM — Stellar </h1>
-  <p>laam: Connect with <strong>Albedo</strong> or paste a <strong>secret key</strong> (for testing only). Creates & views offers for the Laam/XLM pair.</p>  <div class="card">
-    <h3>1) Wallet / Access</h3>
-    <div class="warn"><strong>Security:</strong> Never paste your production secret key into random pages. This field is only for local testing.</div><div style="margin-top:10px">
-  <button id="btnAlbedo">Connect with Albedo (recommended)</button>
-  <button id="btnDisconnect">Disconnect</button>
-</div>
+  <h1>Laam DEX</h1>
+  <div class="card">
+    <h2>Enter Secret Key</h2>
+    <input type="password" id="secretKey" placeholder="Your Stellar Secret Key"><h3>Trade Options</h3>
+<select id="tradeType">
+  <option value="xlm_to_laam">XLM → Laam</option>
+  <option value="fiat_to_laam">Fiat → Laam</option>
+  <option value="laam_to_fiat">Laam → Fiat</option>
+</select>
 
-<label>Or paste secret key (for testing):</label>
-<input id="secretInput" placeholder="S... (secret key)" />
-<button id="btnUseSecret">Use Secret Key</button>
+<input type="number" id="amount" placeholder="Amount">
+<button onclick="placeTrade()">Place Trade</button>
 
-<p>Public Key: <span id="pubKey">—</span></p>
+  </div>  <script>
+    function placeTrade() {
+      const secret = document.getElementById('secretKey').value.trim();
+      const type = document.getElementById('tradeType').value;
+      const amount = parseFloat(document.getElementById('amount').value);
 
-  </div>  <div class="card">
-    <h3>2) Order Book (Laam / XLM)</h3>
-    <div>
-      <button id="btnRefresh">Refresh Orderbook</button>
-    </div>
-    <div class="row">
-      <div class="col">
-        <h4>Asks (Sell Laam → XLM)</h4>
-        <div id="asks"></div>
-      </div>
-      <div class="col">
-        <h4>Bids (Buy Laam ← XLM)</h4>
-        <div id="bids"></div>
-      </div>
-    </div>
-  </div>  <div class="card">
-    <h3>3) Create Offer</h3>
-    <label>Side</label>
-    <select id="side">
-      <option value="sell">Sell Laam (receive XLM)</option>
-      <option value="buy">Buy Laam (spend XLM)</option>
-    </select><label>Amount (Laam)</label>
-<input id="amount" placeholder="e.g. 10" />
-<label>Price (XLM per Laam)</label>
-<input id="price" placeholder="e.g. 0.5" />
-<button id="btnCreateOffer">Create Offer</button>
-
-<p id="txStatus"></p>
-
-  </div>  <div class="card">
-    <h3>4) Trade History (recent)</h3>
-    <div id="trades"></div>
-  </div>  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/8.2.3/stellar-sdk.min.js"></script>  <!-- Albedo intent library: if not available the Albedo button will fail gracefully -->  <script src="https://unpkg.com/@albedo-link/intent/dist/bundle.min.js"></script>  <script>
-    // ----- Configuration -----
-    const HORIZON = 'https://horizon.stellar.org';
-    const SERVER = new StellarSdk.Server(HORIZON);
-
-    // Laam token info (from your project memory)
-    const LAAM_CODE = 'Laam';
-    const LAAM_ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
-
-    // UI refs
-    const pubKeyEl = document.getElementById('pubKey');
-    const btnAlbedo = document.getElementById('btnAlbedo');
-    const btnDisconnect = document.getElementById('btnDisconnect');
-    const secretInput = document.getElementById('secretInput');
-    const btnUseSecret = document.getElementById('btnUseSecret');
-    const asksEl = document.getElementById('asks');
-    const bidsEl = document.getElementById('bids');
-    const btnRefresh = document.getElementById('btnRefresh');
-    const btnCreateOffer = document.getElementById('btnCreateOffer');
-    const txStatus = document.getElementById('txStatus');
-    const tradesEl = document.getElementById('trades');
-
-    let activeKeypair = null; // StellarSdk.Keypair or null
-    let albedoPubKey = null; // when connected by albedo
-    let useAlbedo = false;
-
-    // ----- Wallet Connect (Albedo) -----
-    btnAlbedo.onclick = async () => {
-      try {
-        // albedo.link intent usage
-        const res = await albedo.publicKey();
-        if (res && res.pubkey) {
-          albedoPubKey = res.pubkey;
-          useAlbedo = true;
-          activeKeypair = null;
-          pubKeyEl.textContent = albedoPubKey;
-          txStatus.textContent = 'Connected via Albedo';
-        } else {
-          txStatus.textContent = 'Albedo did not return a key';
-        }
-      } catch (e) {
-        console.error(e);
-        txStatus.textContent = 'Albedo connect failed — is Albedo installed / mobile app available?';
+      if (!secret || isNaN(amount) || amount <= 0) {
+        alert('Please enter valid details.');
+        return;
       }
-    };
 
-    btnDisconnect.onclick = () => {
-      activeKeypair = null; albedoPubKey = null; useAlbedo = false;
-      pubKeyEl.textContent = '—';
-      txStatus.textContent = 'Disconnected';
-    };
-
-    // ----- Secret key usage (testing only) -----
-    btnUseSecret.onclick = () => {
-      const s = secretInput.value.trim();
-      try {
-        if (!s) throw new Error('No secret');
-        const kp = StellarSdk.Keypair.fromSecret(s);
-        activeKeypair = kp;
-        useAlbedo = false;
-        albedoPubKey = null;
-        pubKeyEl.textContent = kp.publicKey();
-        txStatus.textContent = 'Using secret key (testing only)';
-      } catch (e) {
-        alert('Invalid secret key');
-      }
-    };
-
-    // ----- Orderbook fetching -----
-    async function loadOrderbook() {
-      asksEl.innerHTML = 'Loading...'; bidsEl.innerHTML = 'Loading...';
-      try {
-        const res = await fetch(`${HORIZON}/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_CODE}&selling_asset_issuer=${LAAM_ISSUER}&buying_asset_type=native`);
-        const ob = await res.json();
-        renderSide(asksEl, ob.asks);
-        renderSide(bidsEl, ob.bids);
-      } catch (e) {
-        asksEl.textContent = 'Failed to load'; bidsEl.textContent = 'Failed to load';
-        console.error(e);
-      }
+      alert(`Trade placed: ${type.replace(/_/g, ' ')} | Amount: ${amount}`);
     }
-
-    function renderSide(container, items){
-      container.innerHTML = '';
-      if (!items || items.length === 0) { container.textContent = '—'; return; }
-      const ul = document.createElement('div');
-      items.slice(0,20).forEach(it => {
-        const d = document.createElement('div');
-        d.innerHTML = `Price: ${it.price} — Amount: ${it.amount}`;
-        ul.appendChild(d);
-      });
-      container.appendChild(ul);
-    }
-
-    btnRefresh.onclick = loadOrderbook;
-    loadOrderbook();
-
-    // ----- Create Offer -----
-    btnCreateOffer.onclick = async () => {
-      txStatus.textContent = '';
-      const side = document.getElementById('side').value;
-      const amount = document.getElementById('amount').value.trim();
-      const price = document.getElementById('price').value.trim();
-      if (!amount || isNaN(Number(amount)) || !price || isNaN(Number(price))) { alert('Enter numeric amount & price'); return; }
-
-      // build transaction
-      try {
-        let sourcePub;
-        if (useAlbedo && albedoPubKey) sourcePub = albedoPubKey;
-        else if (activeKeypair) sourcePub = activeKeypair.publicKey();
-        else { alert('Connect wallet (Albedo) or provide secret key'); return; }
-
-        const account = await SERVER.loadAccount(sourcePub);
-        const fee = await SERVER.fetchBaseFee();
-
-        const txb = new StellarSdk.TransactionBuilder(account, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC });
-
-        const laamAsset = new StellarSdk.Asset(LAAM_CODE, LAAM_ISSUER);
-
-        if (side === 'sell'){
-          // sell Laam, buy XLM
-          txb.addOperation(StellarSdk.Operation.manageSellOffer({
-            selling: laamAsset,
-            buying: StellarSdk.Asset.native(),
-            amount: amount.toString(),
-            price: price.toString()
-          }));
-        } else {
-          // buy Laam: sell XLM to buy Laam -> create manageBuyOffer
-          txb.addOperation(StellarSdk.Operation.manageBuyOffer({
-            selling: StellarSdk.Asset.native(),
-            buying: laamAsset,
-            buyAmount: amount.toString(),
-            price: price.toString()
-          }));
-        }
-
-        const tx = txb.setTimeout(30).build();
-
-        if (useAlbedo && albedoPubKey) {
-          // sign via albedo
-          try {
-            const xdr = tx.toXDR();
-            const sigRes = await albedo.sign({tx: xdr});
-            // submit signature(s) — albedo returns signature(s) which are applied client-side
-            // Here we expect albedo to return a signed envelope xdr
-            if (sigRes && sigRes.signed_envelope_xdr) {
-              const submitRes = await SERVER.submitTransaction(sigRes.signed_envelope_xdr);
-              txStatus.textContent = 'Submitted (Albedo) — ' + (submitRes.hash || 'submitted');
-            } else {
-              txStatus.textContent = 'Albedo did not return signed envelope';
-            }
-          } catch (e) {
-            console.error(e); txStatus.textContent = 'Albedo signing failed';
-          }
-        } else if (activeKeypair) {
-          tx.sign(activeKeypair);
-          const txRes = await SERVER.submitTransaction(tx);
-          txStatus.textContent = 'Submitted — ' + txRes.hash;
-        }
-
-        // refresh orderbook & trades
-        await loadOrderbook();
-        await loadTrades();
-
-      } catch (e) {
-        console.error(e);
-        txStatus.textContent = 'Error: ' + (e.response && e.response.data ? JSON.stringify(e.response.data) : e.message);
-      }
-    };
-
-    // ----- Recent trades -----
-    async function loadTrades(){
-      tradesEl.innerHTML = 'Loading...';
-      try{
-        const path = `${HORIZON}/trades?offer_asset_type=credit_alphanum4&offer_asset_code=${LAAM_CODE}&offer_asset_issuer=${LAAM_ISSUER}&limit=20&order=desc`;
-        const res = await fetch(path);
-        const data = await res.json();
-        tradesEl.innerHTML = '';
-        if (!data._embedded || !data._embedded.records || data._embedded.records.length===0){ tradesEl.textContent = '—'; return; }
-        data._embedded.records.forEach(r => {
-          const div = document.createElement('div');
-          div.innerHTML = `ID:${r.id} — Price:${r.price} — Base:${r.base_amount} ${r.base_asset_code||'XLM'} — Counter:${r.counter_amount} ${r.counter_asset_code||'XLM'}`;
-          tradesEl.appendChild(div);
-        });
-      }catch(e){ console.error(e); tradesEl.textContent='Failed to load'; }
-    }
-
-    loadTrades();
-
-    // friendly note if albedo library not present
-    if (!window.albedo) {
-      console.warn('Albedo library not found — Albedo connect/buttons will not work in this environment');
-    }
-
   </script></body>
 </html>
