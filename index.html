@@ -3,24 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Laam  account— Create & Trade</title>
+<title>Laam DEX — Create & Trade</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
   :root{
-    /* original warm/golden palette from earlier design */
-    --bg1: #071421;
-    --bg2: #0f2a33;
-    --bg3: #203a43;
-    --card: #1e2a38;
-    --card2: #22354b;
-    --text: #e6eef6;
-    --muted: #6a7a8c;
-    --brand: #ffd36b;
-    --brand2: #ffca3a;
-    --line: #395269;
-    --maxw: 900px;
-    --elw: 620px;
-    --rad: 14px;
+    --bg1:#071421; --bg2:#0f2a33; --bg3:#203a43;
+    --card:#1e2a38; --card2:#22354b;
+    --text:#e6eef6; --muted:#6a7a8c;
+    --brand:#ffd36b; --brand2:#ffca3a; --line:#395269;
+    --maxw: 900px; --elw: 620px; --rad: 14px;
   }
   *{box-sizing:border-box}
   body{
@@ -51,35 +42,21 @@
   input, select, button, .mono{
     width:100%;
     padding:12px 14px;
-    border-radius:12px;
-    border:none;
-    font-size:1rem;
+    border-radius:12px; border:none; font-size:1rem;
   }
-  input, select{
-    background:var(--card);
-    color:var(--text);
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.35);
-  }
+  input, select{ background:var(--card); color:var(--text); box-shadow: inset 0 0 8px rgba(0,0,0,0.35); }
   input::placeholder{ color:var(--muted) }
   button{
-    background:var(--brand);
-    color:#071422;
-    font-weight:800;
-    cursor:pointer;
+    background:var(--brand); color:#071422; font-weight:800; cursor:pointer;
     box-shadow: 0 6px 18px rgba(255, 211, 107, 0.45);
-    text-transform:uppercase;
-    letter-spacing:.03em;
+    text-transform:uppercase; letter-spacing:.03em;
   }
   button:hover:not(:disabled){ background:var(--brand2); box-shadow:0 10px 26px rgba(255,202,58,0.6); }
   button:disabled{ background:#777; cursor:not-allowed; box-shadow:none; color:#222; }
   .mono{
     font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
-    background:var(--card2);
-    color:var(--text);
-    border-radius:12px;
-    text-align:left;
-    word-break:break-word;
-    padding:10px 12px;
+    background:var(--card2); color:var(--text); border-radius:12px;
+    text-align:left; word-break:break-word; padding:10px 12px;
   }
   .row{ margin:12px 0; max-width:var(--elw); margin-left:auto; margin-right:auto; text-align:left; }
   hr{ border:0; border-top:1px solid var(--line); margin:18px auto; max-width:var(--elw); }
@@ -92,6 +69,15 @@
   @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } .row{text-align:left;} }
   .muted{ color:var(--muted); font-size:.95rem; text-align:left; max-width:var(--elw); margin:6px auto 0; }
   #statusMsg{ text-align:center; color:var(--brand); font-weight:700; min-height:24px; margin-top:10px; text-shadow:0 0 6px rgba(255,211,107,0.12); }
+  /* Balance badges */
+  .balances{ display:flex; gap:10px; }
+  .badge{
+    flex:1; background:var(--card); border-radius:12px; padding:12px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.25);
+  }
+  .badge .t{ color:var(--muted); font-weight:600; }
+  .badge .v{ font-weight:800; color:var(--brand); text-shadow:0 0 6px rgba(255,211,107,.15); }
 </style>
 </head>
 <body>
@@ -128,6 +114,25 @@
       <div class="row">
         <label>Public Key</label>
         <div id="accountPubKey" class="mono">-</div>
+      </div>
+
+      <!-- BALANCES -->
+      <div class="row">
+        <label>Balances</label>
+        <div class="balances">
+          <div class="badge">
+            <span class="t">XLM</span>
+            <span id="balXLM" class="v">0.0000000</span>
+          </div>
+          <div class="badge">
+            <span class="t">Laam</span>
+            <span id="balLAAM" class="v">0.0000000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="text-align:center;">
+        <button id="refreshBalancesBtn" disabled>Refresh Balances</button>
       </div>
 
       <div class="row" style="text-align:center;">
@@ -197,6 +202,10 @@
     const pubKeyDisplay = document.getElementById('accountPubKey');
     const addTrustlineBtn = document.getElementById('addTrustlineBtn');
 
+    const balXLM = document.getElementById('balXLM');
+    const balLAAM = document.getElementById('balLAAM');
+    const refreshBalancesBtn = document.getElementById('refreshBalancesBtn');
+
     const tradePairSelect = document.getElementById('tradePair');
     const amountInput = document.getElementById('tradeAmount');
     const priceInput = document.getElementById('tradePrice');
@@ -216,6 +225,19 @@
     function updateAmountLabel(){ amountLabel.textContent = tradePairSelect.value === 'xlm_to_laam' ? 'XLM' : 'Laam'; }
     function clearTables(){ buyOffersTbody.innerHTML=''; sellOffersTbody.innerHTML=''; }
     function invertPrice(p){ const x=parseFloat(p); return (!isFinite(x)||x===0)?0:1/x; }
+    function renderBalances(acc){
+      // default zeros
+      let xlm = '0.0000000';
+      let laam = '0.0000000';
+      if(acc && acc.balances){
+        acc.balances.forEach(b=>{
+          if(b.asset_type === 'native'){ xlm = parseFloat(b.balance).toFixed(7); }
+          if(b.asset_code === LAAM.code && b.asset_issuer === LAAM.issuer){ laam = parseFloat(b.balance).toFixed(7); }
+        });
+      }
+      balXLM.textContent = xlm;
+      balLAAM.textContent = laam;
+    }
 
     // ===== Create / Generate account =====
     createBtn.addEventListener('click', () => {
@@ -229,6 +251,7 @@
         newSecretDiv.textContent = secret;
         newPublicDiv.textContent = pub;
         secretInput.value = secret;
+        renderBalances(null); // reset
         setStatus('New keypair generated locally. Fund the account to activate on mainnet.');
         createBtn.textContent = old;
         createBtn.disabled = false;
@@ -246,6 +269,8 @@
         accountData = await server.loadAccount(activeKeypair.publicKey());
         setStatus('Account loaded.');
         addTrustlineBtn.disabled = false;
+        refreshBalancesBtn.disabled = false;
+        renderBalances(accountData);
         fetchOrderbook();
       }catch(err){
         console.error(err);
@@ -254,10 +279,23 @@
         activeKeypair = null; accountData = null;
         pubKeyDisplay.textContent = '-';
         addTrustlineBtn.disabled = true;
+        refreshBalancesBtn.disabled = true;
+        renderBalances(null);
         clearTables();
       }
     }
     loadBtn.addEventListener('click', loadAccount);
+
+    // Manual refresh balances
+    refreshBalancesBtn.addEventListener('click', async ()=>{
+      if(!activeKeypair) return;
+      try{
+        accountData = await server.loadAccount(activeKeypair.publicKey());
+        renderBalances(accountData);
+        setStatus('Balances refreshed.');
+        setTimeout(()=>setStatus(''),1200);
+      }catch(e){ console.error(e); setStatus('Could not refresh balances.'); }
+    });
 
     // ===== Add Trustline =====
     async function addTrustline(){
@@ -275,6 +313,7 @@
         const res = await server.submitTransaction(tx);
         setStatus('Trustline added! Tx: ' + res.hash);
         accountData = await server.loadAccount(activeKeypair.publicKey());
+        renderBalances(accountData);
       }catch(err){
         console.error(err);
         setStatus('Error adding trustline: ' + (err.message || err));
@@ -331,7 +370,7 @@
       }
     }
 
-    // auto-refresh orderbook every 8 seconds
+    // Auto-refresh orderbook every 8s
     let refreshTimer = setInterval(fetchOrderbook, 8000);
 
     // ===== Place Offer =====
@@ -364,6 +403,9 @@
         setStatus('Submitting transaction...');
         const res = await server.submitTransaction(tx);
         setStatus('Offer placed. Tx: ' + res.hash);
+        // Refresh balances + orderbook after placing
+        accountData = await server.loadAccount(activeKeypair.publicKey());
+        renderBalances(accountData);
         fetchOrderbook();
       }catch(err){
         console.error(err);
@@ -395,6 +437,7 @@
 
     // init
     updateAmountLabel();
+    renderBalances(null);
     fetchOrderbook();
   </script>
 </body>
