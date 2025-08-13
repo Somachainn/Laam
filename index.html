@@ -7,45 +7,91 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
   :root{
-    --bg1:#0f2027; --bg2:#203a43; --bg3:#2c5364;
-    --card:#1e2a38; --card2:#22354b;
-    --text:#e6eef6; --muted:#6a7a8c;
-    --brand:#ffd36b; --brand2:#ffca3a; --line:#395269;
-    --maxw: 900px; --elw: 620px; --rad:14px;
+    /* original warm/golden palette from earlier design */
+    --bg1: #071421;
+    --bg2: #0f2a33;
+    --bg3: #203a43;
+    --card: #1e2a38;
+    --card2: #22354b;
+    --text: #e6eef6;
+    --muted: #6a7a8c;
+    --brand: #ffd36b;
+    --brand2: #ffca3a;
+    --line: #395269;
+    --maxw: 900px;
+    --elw: 620px;
+    --rad: 14px;
   }
   *{box-sizing:border-box}
   body{
     margin:0; min-height:100vh;
     display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    background: linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
     font-family:'Inter',system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
     color:var(--text);
     padding:28px 16px;
   }
   .app{width:100%; max-width:var(--maxw); text-align:center;}
-  h1{margin:0 0 14px; font-size:2.4rem; color:var(--brand); text-shadow:0 0 8px var(--brand);}
-  .card{background:rgba(255,255,255,0.03); border-radius:18px; padding:18px; margin:14px auto; max-width:var(--elw);}
+  h1{
+    margin:0 0 14px;
+    font-size:2.4rem;
+    color:var(--brand);
+    text-shadow:0 0 10px rgba(255,211,107,0.25);
+    font-weight:700;
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:18px;
+    padding:20px;
+    margin:14px auto;
+    max-width:var(--elw);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  }
   label{display:block; text-align:left; color:var(--brand); font-weight:600; margin-bottom:8px;}
   input, select, button, .mono{
-    width:100%; padding:12px 14px; border-radius:12px; border:none; font-size:1rem;
+    width:100%;
+    padding:12px 14px;
+    border-radius:12px;
+    border:none;
+    font-size:1rem;
   }
-  input, select{ background:var(--card); color:var(--text); box-shadow: inset 0 0 8px rgba(0,0,0,0.25);}
-  input::placeholder{color:var(--muted)}
-  button{ background:var(--brand); color:#071422; font-weight:800; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,0.35); text-transform:uppercase; letter-spacing:.03em; }
-  button:hover:not(:disabled){ background:var(--brand2); box-shadow:0 12px 28px rgba(0,0,0,0.4); }
-  button:disabled{ background:#777; cursor:not-allowed; box-shadow:none; color:#222;}
-  .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace; background:var(--card2); color:var(--text); border-radius:12px; text-align:left; word-break:break-word; padding:10px 12px;}
-  .row{ margin:12px 0; max-width:var(--elw); margin-left:auto; margin-right:auto; text-align:left;}
+  input, select{
+    background:var(--card);
+    color:var(--text);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.35);
+  }
+  input::placeholder{ color:var(--muted) }
+  button{
+    background:var(--brand);
+    color:#071422;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow: 0 6px 18px rgba(255, 211, 107, 0.45);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  button:hover:not(:disabled){ background:var(--brand2); box-shadow:0 10px 26px rgba(255,202,58,0.6); }
+  button:disabled{ background:#777; cursor:not-allowed; box-shadow:none; color:#222; }
+  .mono{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    background:var(--card2);
+    color:var(--text);
+    border-radius:12px;
+    text-align:left;
+    word-break:break-word;
+    padding:10px 12px;
+  }
+  .row{ margin:12px 0; max-width:var(--elw); margin-left:auto; margin-right:auto; text-align:left; }
   hr{ border:0; border-top:1px solid var(--line); margin:18px auto; max-width:var(--elw); }
-  h2{ color:var(--brand); margin:12px 0 6px 0; text-shadow:0 0 6px var(--brand); text-align:left; max-width:var(--elw); margin-left:auto; margin-right:auto;}
+  h2{ color:var(--brand); margin:12px 0 6px 0; text-shadow: 0 0 6px rgba(255,211,107,.15); text-align:left; max-width:var(--elw); margin-left:auto; margin-right:auto; }
   table{ width:100%; border-collapse:separate; border-spacing:0 10px; margin:12px auto 0; max-width:var(--elw); }
-  thead th{ color:var(--brand); font-weight:700; padding:6px 8px; background:transparent; text-align:center;}
-  tbody td{ background:var(--card); padding:12px 8px; border-radius:10px; text-align:center; color:var(--text);}
+  thead th{ color:var(--brand); font-weight:700; padding:6px 8px; background:transparent; text-align:center; }
+  tbody td{ background:var(--card); padding:12px 8px; border-radius:10px; text-align:center; color:var(--text); }
   tbody tr:hover td{ background:var(--card2); }
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:var(--elw); margin:0 auto; }
   @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } .row{text-align:left;} }
   .muted{ color:var(--muted); font-size:.95rem; text-align:left; max-width:var(--elw); margin:6px auto 0; }
-  #statusMsg{ text-align:center; color:var(--brand); font-weight:700; min-height:24px; margin-top:10px; text-shadow:0 0 6px var(--brand);}
+  #statusMsg{ text-align:center; color:var(--brand); font-weight:700; min-height:24px; margin-top:10px; text-shadow:0 0 6px rgba(255,211,107,0.12); }
 </style>
 </head>
 <body>
@@ -173,20 +219,18 @@
 
     // ===== Create / Generate account =====
     createBtn.addEventListener('click', () => {
-      // visual two-step: change text to reflect generation step, then create
       createBtn.disabled = true;
       const old = createBtn.textContent;
       createBtn.textContent = 'Generate New Stellar Account...';
-      setTimeout(()=>{ // small UX pause
+      setTimeout(()=>{ 
         const kp = StellarSdk.Keypair.random();
         const secret = kp.secret();
         const pub = kp.publicKey();
         newSecretDiv.textContent = secret;
         newPublicDiv.textContent = pub;
-        // also prefill the login secret input (so user can click Load Account quickly)
         secretInput.value = secret;
         setStatus('New keypair generated locally. Fund the account to activate on mainnet.');
-        createBtn.textContent = 'Create New Account';
+        createBtn.textContent = old;
         createBtn.disabled = false;
       }, 300);
     });
@@ -202,7 +246,6 @@
         accountData = await server.loadAccount(activeKeypair.publicKey());
         setStatus('Account loaded.');
         addTrustlineBtn.disabled = false;
-        // refresh orderbook on login
         fetchOrderbook();
       }catch(err){
         console.error(err);
@@ -214,7 +257,6 @@
         clearTables();
       }
     }
-
     loadBtn.addEventListener('click', loadAccount);
 
     // ===== Add Trustline =====
@@ -232,7 +274,6 @@
         tx.sign(activeKeypair);
         const res = await server.submitTransaction(tx);
         setStatus('Trustline added! Tx: ' + res.hash);
-        // reload account balances
         accountData = await server.loadAccount(activeKeypair.publicKey());
       }catch(err){
         console.error(err);
@@ -301,10 +342,7 @@
       if(!isFinite(amountRaw) || amountRaw <= 0){ alert('Enter a valid amount.'); return; }
       if(!isFinite(priceUi) || priceUi <= 0){ alert('Enter a valid price.'); return; }
 
-      // Convert UI price (XLM per Laam) to Horizon price (Laam per XLM)
       const priceLaamPerXlm = (priceUi === 0) ? 0 : (1 / priceUi);
-
-      // Determine assets
       let sellingAsset, buyingAsset;
       if(tradePairSelect.value === 'xlm_to_laam'){ sellingAsset = XLM; buyingAsset = LAAM; }
       else { sellingAsset = LAAM; buyingAsset = XLM; }
@@ -329,7 +367,6 @@
         fetchOrderbook();
       }catch(err){
         console.error(err);
-        // try to show friendly message
         let msg = err.message || err;
         if(err && err.response && err.response.data && err.response.data.extras && err.response.data.extras.result_codes){
           msg = JSON.stringify(err.response.data.extras.result_codes);
@@ -339,7 +376,7 @@
     }
     placeOfferBtn.addEventListener('click', placeOffer);
 
-    // ===== totals helper =====
+    // totals helper
     function calculateTotal(){
       const amount = parseFloat(amountInput.value);
       const price = parseFloat(priceInput.value);
@@ -361,4 +398,4 @@
     fetchOrderbook();
   </script>
 </body>
-  </html>
+</html>
