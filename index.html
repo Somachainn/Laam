@@ -1,444 +1,432 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="so">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Laam DEX — Create & Trade</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laam DEX Wallet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/10.4.0/stellar-sdk.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
   :root{
-    --bg1:#071421; --bg2:#0f2a33; --bg3:#203a43;
-    --card:#1e2a38; --card2:#22354b;
-    --text:#e6eef6; --muted:#6a7a8c;
-    --brand:#ffd36b; --brand2:#ffca3a; --line:#395269;
-    --maxw: 900px; --elw: 620px; --rad: 14px;
+    /* New Blue & White Theme */
+    --bg1:#eef2f3; --bg2:#8e9eab;
+    --card:rgba(255, 255, 255, 0.9);
+    --card2:rgba(255, 255, 255, 0.7);
+    --text:#0a192f; --muted:#546e7a;
+    --brand:#0052cc; --brand2:#0041a3; --line: #d0d8e0;
+    --ok:#28a745; --warn:#ffc107; --err:#dc3545;
+    --maxw: 920px; --rad:16px;
   }
   *{box-sizing:border-box}
   body{
-    margin:0; min-height:100vh;
-    display:flex; align-items:center; justify-content:center;
-    background: linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
-    font-family:'Inter',system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
+    margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color:var(--text);
-    padding:28px 16px;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    min-height:100vh; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px;
   }
-  .app{width:100%; max-width:var(--maxw); text-align:center;}
+  .app{ width:100%; max-width:var(--maxw); text-align:center; }
   h1{
-    margin:0 0 14px;
-    font-size:2.4rem;
-    color:var(--brand);
-    text-shadow:0 0 10px rgba(255,211,107,0.25);
-    font-weight:700;
+    margin:0 0 18px 0; font-size:2.2rem; font-weight:800; color:var(--brand);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
   }
   .card{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:18px;
-    padding:20px;
+    background: var(--card);
+    border:1px solid var(--line);
+    border-radius: var(--rad);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding:22px;
     margin:14px auto;
-    max-width:var(--elw);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
   }
-  label{display:block; text-align:left; color:var(--brand); font-weight:600; margin-bottom:8px;}
-  input, select, button, .mono{
-    width:100%;
-    padding:12px 14px;
-    border-radius:12px; border:none; font-size:1rem;
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:820px){ .grid-2{ grid-template-columns:1fr; } }
+
+  label{ display:block; text-align:left; margin:8px 0 6px; font-weight:600; color:var(--brand); }
+  input, select, button{
+    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; font-size:1rem;
+    background: #f8f9fa; color:var(--text); outline:none;
+    transition: border-color .2s ease;
   }
-  input, select{ background:var(--card); color:var(--text); box-shadow: inset 0 0 8px rgba(0,0,0,0.35); }
-  input::placeholder{ color:var(--muted) }
+  input:focus { border-color: var(--brand); }
   button{
-    background:var(--brand); color:#071422; font-weight:800; cursor:pointer;
-    box-shadow: 0 6px 18px rgba(255, 211, 107, 0.45);
-    text-transform:uppercase; letter-spacing:.03em;
+    background: var(--brand); color:white; font-weight:700; letter-spacing:.02em;
+    border:none; box-shadow: 0 4px 14px rgba(0, 82, 204, 0.3); cursor:pointer; text-transform:uppercase;
+    transition: all .2s ease;
   }
-  button:hover:not(:disabled){ background:var(--brand2); box-shadow:0 10px 26px rgba(255,202,58,0.6); }
-  button:disabled{ background:#777; cursor:not-allowed; box-shadow:none; color:#222; }
+  button:hover{ background:var(--brand2); box-shadow:0 6px 18px rgba(0, 65, 163, 0.4); transform: translateY(-2px); }
+  button:disabled{ background:#b0bec5; cursor:not-allowed; box-shadow:none; transform: none; }
+  .btn-secondary { background: #6c757d; color: white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+  .btn-secondary:hover { background: #5a6268; }
+  .btn-danger { background: var(--err); color: white; box-shadow: 0 4px 14px rgba(220, 53, 69, 0.3); }
+  .btn-danger:hover { background: #c82333; }
+
   .mono{
-    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
-    background:var(--card2); color:var(--text); border-radius:12px;
-    text-align:left; word-break:break-word; padding:10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    background:#e9ecef; padding:10px 12px; border-radius:12px;
+    overflow-wrap:anywhere; word-break:break-word; color: #343a40;
   }
-  .row{ margin:12px 0; max-width:var(--elw); margin-left:auto; margin-right:auto; text-align:left; }
-  hr{ border:0; border-top:1px solid var(--line); margin:18px auto; max-width:var(--elw); }
-  h2{ color:var(--brand); margin:12px 0 6px 0; text-shadow: 0 0 6px rgba(255,211,107,.15); text-align:left; max-width:var(--elw); margin-left:auto; margin-right:auto; }
-  table{ width:100%; border-collapse:separate; border-spacing:0 10px; margin:12px auto 0; max-width:var(--elw); }
-  thead th{ color:var(--brand); font-weight:700; padding:6px 8px; background:transparent; text-align:center; }
-  tbody td{ background:var(--card); padding:12px 8px; border-radius:10px; text-align:center; color:var(--text); }
-  tbody tr:hover td{ background:var(--card2); }
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:var(--elw); margin:0 auto; }
-  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } .row{text-align:left;} }
-  .muted{ color:var(--muted); font-size:.95rem; text-align:left; max-width:var(--elw); margin:6px auto 0; }
-  #statusMsg{ text-align:center; color:var(--brand); font-weight:700; min-height:24px; margin-top:10px; text-shadow:0 0 6px rgba(255,211,107,0.12); }
-  /* Balance badges */
-  .balances{ display:flex; gap:10px; }
-  .badge{
-    flex:1; background:var(--card); border-radius:12px; padding:12px 14px;
-    display:flex; align-items:center; justify-content:space-between;
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.25);
+  #status{
+    min-height:28px; font-weight:700; color:var(--brand);
   }
-  .badge .t{ color:var(--muted); font-weight:600; }
-  .badge .v{ font-weight:800; color:var(--brand); text-shadow:0 0 6px rgba(255,211,107,.15); }
+  .muted{ color:var(--muted); font-size:.92rem; }
+  .balances{
+    display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
+  }
+  .pill{
+    background:#e9ecef; border:1px solid var(--line);
+    padding:8px 14px; border-radius:999px; font-weight:600; color: var(--text);
+  }
+  .hidden { display: none; }
+  .send-wrap{ display:none; margin-top:16px; text-align:left; border-top: 1px solid var(--line); padding-top: 16px; }
+  .send-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:640px){ .send-row{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
   <div class="app">
-    <h1>Laam DEX</h1>
+    <h1>Laam DEX Wallet</h1>
 
-    <div class="card">
-      <!-- Create / Generate account -->
-      <div class="row" style="text-align:center;">
-        <button id="createAccountBtn">Create New Account</button>
+    <!-- INITIAL CHOICE / LOGIN SECTION -->
+    <div id="authSection" class="card">
+      <!-- Unlock Wallet View -->
+      <div id="unlockView" class="hidden">
+        <h3 style="margin:0 0 10px 0; color:var(--brand)">Unlock Your Wallet</h3>
+        <label for="walletPassword">Password</label>
+        <input id="walletPassword" type="password" placeholder="Enter your password" />
+        <button id="unlockBtn" style="margin-top:10px;">Unlock</button>
+        <p class="muted" style="margin-top:10px;">
+          <a href="#" id="resetWalletLink">Reset and import a different key</a>.
+        </p>
       </div>
 
-      <div class="row">
-        <label>New Account Secret Key</label>
-        <div id="newSecret" class="mono">-</div>
-      </div>
-      <div class="row">
-        <label>New Account Public Key</label>
-        <div id="newPublic" class="mono">-</div>
-      </div>
-      <div class="muted">Store your secret key securely — it cannot be recovered if lost.</div>
-
-      <hr/>
-
-      <!-- Login / Load -->
-      <div class="row">
-        <label for="secretKeyInput">Secret Key (Paste to login)</label>
-        <input id="secretKeyInput" type="password" placeholder="Enter your Stellar secret key (S...)" />
-      </div>
-      <div class="row" style="text-align:center;">
-        <button id="loadAccountBtn">Load Account</button>
+      <!-- Initial Choice View -->
+      <div id="initialChoiceView">
+        <h3 style="margin:0 0 16px 0; color:var(--brand)">Welcome!</h3>
+        <div class="grid-2">
+            <button id="showCreateBtn">Create New Wallet</button>
+            <button id="showImportBtn" class="btn-secondary">Import Existing Wallet</button>
+        </div>
       </div>
 
-      <div class="row">
-        <label>Public Key</label>
-        <div id="accountPubKey" class="mono">-</div>
+      <!-- Create/Import Views -->
+      <div id="createImportView" class="hidden">
+        <div id="createView" class="hidden">
+            <h3 style="margin:0 0 10px 0; color:var(--brand)">Create New Wallet</h3>
+            <button id="generateAccountBtn">Generate New Stellar Account</button>
+            <div class="muted" style="margin-top:10px;">
+                <strong>Important:</strong> Save your new keys securely before proceeding.
+            </div>
+            <label style="margin-top:10px;">New Secret Key</label>
+            <div id="newSecret" class="mono">-</div>
+            <label style="margin-top:10px;">New Public Key</label>
+            <div id="newPublic" class="mono">-</div>
+        </div>
+        <div id="importView">
+            <h3 style="margin:0 0 10px 0; color:var(--brand)">Import Account</h3>
+            <label for="secretKey">Your Secret Key</label>
+            <input id="secretKey" type="password" placeholder="Starts with S... Keep it safe!" />
+        </div>
+        <hr style="border:none; border-top:1px solid var(--line); margin:20px 0;">
+        <label for="createPassword">Create a Wallet Password</label>
+        <input id="createPassword" type="password" placeholder="Min. 8 characters" />
+        <div class="muted" style="font-size:0.8rem; margin-top:4px;">This password encrypts your key in this browser. We don't store it.</div>
+        <button id="saveWalletBtn" style="margin-top:10px;">Save and Continue</button>
+        <button id="backToChoiceBtn" class="btn-secondary" style="margin-top:10px;">Back</button>
       </div>
+    </div>
 
-      <!-- BALANCES -->
-      <div class="row">
-        <label>Balances</label>
+    <!-- LOGGED IN USER INFO -->
+    <div id="loggedInView" class="hidden">
+      <div class="card">
         <div class="balances">
-          <div class="badge">
-            <span class="t">XLM</span>
-            <span id="balXLM" class="v">0.0000000</span>
-          </div>
-          <div class="badge">
-            <span class="t">Laam</span>
-            <span id="balLAAM" class="v">0.0000000</span>
-          </div>
+          <span class="pill">XLM: <span id="xlmBal">0.00</span></span>
+          <span class="pill">Laam: <span id="laamBal">0.00</span></span>
+        </div>
+        <label style="margin-top:10px;">Your Public Key</label>
+        <div id="pubKey" class="mono">-</div>
+        <div style="display:flex; gap:10px; margin-top:16px; justify-content:center;">
+            <button id="btnSendToggle">Send</button>
+            <button id="addTrustlineBtn">Add Laam Trustline</button>
+            <button id="logoutBtn" class="btn-danger">Lock Wallet</button>
+        </div>
+        <!-- Send Section -->
+        <div id="sendForm" class="send-wrap">
+            <h4 style="margin:0 0 10px 0; color:var(--brand)">Send Assets</h4>
+            <div class="send-row">
+              <div>
+                <label for="sendAsset">Asset</label>
+                <select id="sendAsset">
+                  <option value="XLM">XLM (native)</option>
+                  <option value="LAAM">Laam (token)</option>
+                </select>
+              </div>
+              <div>
+                <label for="sendAmount">Amount</label>
+                <input id="sendAmount" type="number" step="0.0000001" placeholder="e.g. 10" />
+              </div>
+            </div>
+            <label for="sendDest" style="margin-top:8px;">Destination Public Key</label>
+            <input id="sendDest" type="text" placeholder="G... destination" />
+            <div class="muted" style="margin-top:6px;">Note: Sending Laam requires the receiver to have a Laam trustline.</div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button id="btnSend" style="flex:1;">Send Now</button>
+            </div>
         </div>
       </div>
 
-      <div class="row" style="text-align:center;">
-        <button id="refreshBalancesBtn" disabled>Refresh Balances</button>
-      </div>
-
-      <div class="row" style="text-align:center;">
-        <button id="addTrustlineBtn" disabled>Add Trustline for Laam</button>
-      </div>
-
-      <hr/>
-
-      <!-- Trade form -->
-      <h2>Trade Direction</h2>
-      <div class="row">
-        <select id="tradePair">
-          <option value="xlm_to_laam">Buy Laam (Pay XLM)</option>
-          <option value="laam_to_xlm">Sell Laam (Get XLM)</option>
-        </select>
-      </div>
-
-      <div class="grid2 row">
-        <div>
-          <label>Amount (<span id="amountLabel">XLM</span>)</label>
-          <input id="tradeAmount" type="number" placeholder="Enter amount" min="0" step="any" />
-        </div>
-        <div>
+      <!-- TRADE PANELS -->
+      <div class="card trade-panels grid-2">
+        <div class="panel buy">
+          <h3>Buy Laam</h3>
           <label>Price (XLM per Laam)</label>
-          <input id="tradePrice" type="number" placeholder="Enter price" min="0" step="any" value="0.135" />
+          <input id="buyPrice" type="number" step="0.0000001" placeholder="e.g. 0.135" />
+          <label style="margin-top:8px;">Amount (Laam)</label>
+          <input id="buyAmount" type="number" step="0.0000001" placeholder="e.g. 100" />
+          <button id="btnPlaceBuy" style="margin-top:10px;">Place Buy Offer</button>
+        </div>
+        <div class="panel sell">
+          <h3>Sell Laam</h3>
+          <label>Price (XLM per Laam)</label>
+          <input id="sellPrice" type="number" step="0.0000001" placeholder="e.g. 0.135" />
+          <label style="margin-top:8px;">Amount (Laam)</label>
+          <input id="sellAmount" type="number" step="0.0000001" placeholder="e.g. 100" />
+          <button id="btnPlaceSell" style="margin-top:10px;">Place Sell Offer</button>
         </div>
       </div>
+    </div>
 
-      <div class="row" style="text-align:center;">
-        <button id="placeOfferBtn">Place Offer</button>
+    <!-- ORDERBOOK -->
+    <div class="card">
+      <h3 style="margin:0 0 10px 0; color:var(--brand)">Market Offers</h3>
+      <div id="status" style="margin-bottom:10px;">Loading market...</div>
+      <div class="grid-2">
+        <div>
+          <h4 style="margin:0 0 8px 0; color:var(--ok);">Buy Offers (Bids)</h4>
+          <table>
+            <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
+            <tbody id="bidsBody"></tbody>
+          </table>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px 0; color:var(--err);">Sell Offers (Asks)</h4>
+          <table>
+            <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
+            <tbody id="asksBody"></tbody>
+          </table>
+        </div>
       </div>
-
-      <hr/>
-
-      <h2>Market Offers</h2>
-      <table aria-label="Buy offers">
-        <caption style="caption-side:top;">Buy Offers (Bids)</caption>
-        <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
-        <tbody id="buyOffers"><tr><td colspan="3" style="opacity:.7">Loading…</td></tr></tbody>
-      </table>
-
-      <table aria-label="Sell offers">
-        <caption style="caption-side:top;">Sell Offers (Asks)</caption>
-        <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
-        <tbody id="sellOffers"><tr><td colspan="3" style="opacity:.7">Loading…</td></tr></tbody>
-      </table>
-
-      <div id="statusMsg"></div>
     </div>
   </div>
 
-  <!-- Stellar SDK -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/8.2.3/stellar-sdk.min.js"></script>
-  <script>
-    // ===== Stellar (MAINNET) =====
-    const server = new StellarSdk.Server('https://horizon.stellar.org');
-    const LAAM = new StellarSdk.Asset('Laam', 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64');
-    const XLM = StellarSdk.Asset.native();
+<script>
+// === Stellar & UI Setup ===
+const server = new StellarSdk.Server('https://horizon.stellar.org');
+const ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
+const LAAM  = new StellarSdk.Asset('Laam', ISSUER);
+const XLM   = StellarSdk.Asset.native();
+const ENCRYPTED_KEY_NAME = 'laam_dex_wallet_v2';
 
-    // UI refs
-    const createBtn = document.getElementById('createAccountBtn');
-    const newSecretDiv = document.getElementById('newSecret');
-    const newPublicDiv = document.getElementById('newPublic');
+// --- Global State ---
+let keypair = null;
+let account = null;
+let balTimer = null;
 
-    const secretInput = document.getElementById('secretKeyInput');
-    const loadBtn = document.getElementById('loadAccountBtn');
-    const pubKeyDisplay = document.getElementById('accountPubKey');
-    const addTrustlineBtn = document.getElementById('addTrustlineBtn');
+// --- UI Elements ---
+const authSection = document.getElementById('authSection');
+const unlockView = document.getElementById('unlockView');
+const initialChoiceView = document.getElementById('initialChoiceView');
+const createImportView = document.getElementById('createImportView');
+const createView = document.getElementById('createView');
+const importView = document.getElementById('importView');
+const loggedInView = document.getElementById('loggedInView');
+const statusEl = document.getElementById('status');
 
-    const balXLM = document.getElementById('balXLM');
-    const balLAAM = document.getElementById('balLAAM');
-    const refreshBalancesBtn = document.getElementById('refreshBalancesBtn');
+// === Wallet & Encryption Logic ===
+function encryptKey(secretKey, password) { return CryptoJS.AES.encrypt(secretKey, password).toString(); }
+function decryptKey(encryptedKey, password) { const bytes = CryptoJS.AES.decrypt(encryptedKey, password); return bytes.toString(CryptoJS.enc.Utf8); }
+function walletExists() { return !!localStorage.getItem(ENCRYPTED_KEY_NAME); }
 
-    const tradePairSelect = document.getElementById('tradePair');
-    const amountInput = document.getElementById('tradeAmount');
-    const priceInput = document.getElementById('tradePrice');
-    const placeOfferBtn = document.getElementById('placeOfferBtn');
+// --- UI Switching ---
+function showView(viewName) {
+    authSection.style.display = 'none';
+    loggedInView.style.display = 'none';
+    unlockView.style.display = 'none';
+    initialChoiceView.style.display = 'none';
+    createImportView.style.display = 'none';
 
-    const buyOffersTbody = document.getElementById('buyOffers');
-    const sellOffersTbody = document.getElementById('sellOffers');
-    const statusMsg = document.getElementById('statusMsg');
-    const amountLabel = document.getElementById('amountLabel');
-
-    // State
-    let activeKeypair = null;
-    let accountData = null;
-
-    // Helpers
-    function setStatus(msg=''){ statusMsg.textContent = msg; }
-    function updateAmountLabel(){ amountLabel.textContent = tradePairSelect.value === 'xlm_to_laam' ? 'XLM' : 'Laam'; }
-    function clearTables(){ buyOffersTbody.innerHTML=''; sellOffersTbody.innerHTML=''; }
-    function invertPrice(p){ const x=parseFloat(p); return (!isFinite(x)||x===0)?0:1/x; }
-    function renderBalances(acc){
-      // default zeros
-      let xlm = '0.0000000';
-      let laam = '0.0000000';
-      if(acc && acc.balances){
-        acc.balances.forEach(b=>{
-          if(b.asset_type === 'native'){ xlm = parseFloat(b.balance).toFixed(7); }
-          if(b.asset_code === LAAM.code && b.asset_issuer === LAAM.issuer){ laam = parseFloat(b.balance).toFixed(7); }
-        });
-      }
-      balXLM.textContent = xlm;
-      balLAAM.textContent = laam;
+    if (viewName === 'loggedIn') {
+        loggedInView.style.display = 'block';
+    } else {
+        authSection.style.display = 'block';
+        if (viewName === 'unlock') unlockView.style.display = 'block';
+        else if (viewName === 'initial') initialChoiceView.style.display = 'block';
+        else if (viewName === 'create_import') createImportView.style.display = 'block';
     }
+}
 
-    // ===== Create / Generate account =====
-    createBtn.addEventListener('click', () => {
-      createBtn.disabled = true;
-      const old = createBtn.textContent;
-      createBtn.textContent = 'Generate New Stellar Account...';
-      setTimeout(()=>{ 
-        const kp = StellarSdk.Keypair.random();
-        const secret = kp.secret();
-        const pub = kp.publicKey();
-        newSecretDiv.textContent = secret;
-        newPublicDiv.textContent = pub;
-        secretInput.value = secret;
-        renderBalances(null); // reset
-        setStatus('New keypair generated locally. Fund the account to activate on mainnet.');
-        createBtn.textContent = old;
-        createBtn.disabled = false;
-      }, 300);
-    });
+// === Core App Functions ===
+function setStatus(msg, type = 'ok') {
+    statusEl.textContent = msg;
+    const colorMap = { ok: 'var(--brand)', err: 'var(--err)', warn: 'var(--warn)' };
+    statusEl.style.color = colorMap[type] || 'var(--brand)';
+}
 
-    // ===== Load Account (login) =====
-    async function loadAccount(){
-      const secret = secretInput.value.trim();
-      if(!secret){ alert('Please enter your secret key.'); return; }
-      try{
-        activeKeypair = StellarSdk.Keypair.fromSecret(secret);
-        pubKeyDisplay.textContent = activeKeypair.publicKey();
-        setStatus('Loading account data...');
-        accountData = await server.loadAccount(activeKeypair.publicKey());
-        setStatus('Account loaded.');
-        addTrustlineBtn.disabled = false;
-        refreshBalancesBtn.disabled = false;
-        renderBalances(accountData);
-        fetchOrderbook();
-      }catch(err){
-        console.error(err);
-        alert('Invalid secret key or unable to load account on mainnet. If just created, you must fund it with XLM to activate on mainnet.');
-        setStatus('');
-        activeKeypair = null; accountData = null;
-        pubKeyDisplay.textContent = '-';
-        addTrustlineBtn.disabled = true;
-        refreshBalancesBtn.disabled = true;
-        renderBalances(null);
-        clearTables();
-      }
+async function login(secret) {
+    try {
+        keypair = StellarSdk.Keypair.fromSecret(secret);
+        account = await server.loadAccount(keypair.publicKey());
+        document.getElementById('pubKey').textContent = keypair.publicKey();
+        setStatus('Account loaded successfully.', 'ok');
+        showView('loggedIn');
+        await refreshBalances();
+        if (balTimer) clearInterval(balTimer);
+        balTimer = setInterval(refreshBalances, 15000);
+    } catch (e) {
+        keypair = null; account = null;
+        const errMsg = e.message.includes('404') ? 'Account not found. Fund it with XLM to activate.' : 'Could not load account. Check your key.';
+        setStatus(errMsg, 'err');
+        showView(walletExists() ? 'unlock' : 'initial');
     }
-    loadBtn.addEventListener('click', loadAccount);
+}
 
-    // Manual refresh balances
-    refreshBalancesBtn.addEventListener('click', async ()=>{
-      if(!activeKeypair) return;
-      try{
-        accountData = await server.loadAccount(activeKeypair.publicKey());
-        renderBalances(accountData);
-        setStatus('Balances refreshed.');
-        setTimeout(()=>setStatus(''),1200);
-      }catch(e){ console.error(e); setStatus('Could not refresh balances.'); }
-    });
+function logout() {
+    keypair = null; account = null;
+    if (balTimer) clearInterval(balTimer);
+    document.getElementById('walletPassword').value = '';
+    showView(walletExists() ? 'unlock' : 'initial');
+    setStatus('Wallet is locked.');
+}
 
-    // ===== Add Trustline =====
-    async function addTrustline(){
-      if(!activeKeypair || !accountData){ alert('Load account first.'); return; }
-      const exists = accountData.balances.some(b => b.asset_code === LAAM.code && b.asset_issuer === LAAM.issuer);
-      if(exists){ alert('Trustline for Laam already exists.'); return; }
-      try{
-        setStatus('Submitting trustline transaction...');
+async function refreshBalances() {
+    if (!keypair) return;
+    try {
+        account = await server.loadAccount(keypair.publicKey());
+        let xlm = 0, laam = 0;
+        for (const b of account.balances) {
+            if (b.asset_type === 'native') xlm = parseFloat(b.balance);
+            if (b.asset_code === 'Laam' && b.asset_issuer === ISSUER) laam = parseFloat(b.balance);
+        }
+        document.getElementById('xlmBal').textContent = xlm.toFixed(2);
+        document.getElementById('laamBal').textContent = laam.toFixed(2);
+    } catch (e) {
+        console.error('Balance refresh failed:', e);
+        setStatus('Could not refresh balances.', 'warn');
+    }
+}
+
+// === Event Listeners ===
+
+// --- Auth Flow ---
+document.getElementById('showCreateBtn').addEventListener('click', () => {
+    initialChoiceView.style.display = 'none';
+    createImportView.style.display = 'block';
+    createView.style.display = 'block';
+    importView.style.display = 'none';
+});
+document.getElementById('showImportBtn').addEventListener('click', () => {
+    initialChoiceView.style.display = 'none';
+    createImportView.style.display = 'block';
+    createView.style.display = 'none';
+    importView.style.display = 'block';
+});
+document.getElementById('backToChoiceBtn').addEventListener('click', () => {
+    showView('initial');
+});
+document.getElementById('generateAccountBtn').addEventListener('click', () => {
+    const kp = StellarSdk.Keypair.random();
+    document.getElementById('newSecret').textContent = kp.secret();
+    document.getElementById('newPublic').textContent = kp.publicKey();
+    document.getElementById('secretKey').value = kp.secret(); // auto-fill for saving
+    setStatus('New keypair generated. Save it securely!', 'warn');
+});
+document.getElementById('saveWalletBtn').addEventListener('click', () => {
+    const secret = document.getElementById('secretKey').value.trim();
+    const password = document.getElementById('createPassword').value;
+    if (password.length < 8) { alert('Password must be at least 8 characters.'); return; }
+    if (!StellarSdk.StrKey.isValidEd25519SecretSeed(secret)) { alert('Invalid Secret Key.'); return; }
+    const encryptedKey = encryptKey(secret, password);
+    localStorage.setItem(ENCRYPTED_KEY_NAME, encryptedKey);
+    document.getElementById('secretKey').value = '';
+    document.getElementById('createPassword').value = '';
+    login(secret);
+});
+document.getElementById('unlockBtn').addEventListener('click', () => {
+    const password = document.getElementById('walletPassword').value;
+    const encryptedKey = localStorage.getItem(ENCRYPTED_KEY_NAME);
+    if (!password) { alert('Please enter your password.'); return; }
+    try {
+        const secret = decryptKey(encryptedKey, password);
+        if (!StellarSdk.StrKey.isValidEd25519SecretSeed(secret)) throw new Error('Decryption failed');
+        login(secret);
+    } catch (e) {
+        setStatus('Wrong password or corrupted data.', 'err');
+    }
+});
+document.getElementById('logoutBtn').addEventListener('click', logout);
+document.getElementById('resetWalletLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (confirm('Are you sure? This removes the encrypted key from this browser. You will need your secret key to import it again.')) {
+        localStorage.removeItem(ENCRYPTED_KEY_NAME);
+        logout();
+    }
+});
+
+// --- Logged-in Actions ---
+document.getElementById('btnSendToggle').addEventListener('click', () => {
+    const sendForm = document.getElementById('sendForm');
+    sendForm.style.display = sendForm.style.display === 'block' ? 'none' : 'block';
+});
+document.getElementById('btnSend').addEventListener('click', async () => {
+    if (!account || !keypair) { alert('Please log in first.'); return; }
+    const assetSel = document.getElementById('sendAsset').value;
+    const amount = document.getElementById('sendAmount').value;
+    const dest = document.getElementById('sendDest').value.trim();
+    if (!dest || !(parseFloat(amount) > 0)) { alert('Enter a valid destination and amount.'); return; }
+    const asset = (assetSel === 'XLM') ? XLM : LAAM;
+    setStatus('Submitting transaction...', 'ok');
+    try {
+        const freshAccount = await server.loadAccount(keypair.publicKey());
         const fee = await server.fetchBaseFee();
-        const tx = new StellarSdk.TransactionBuilder(accountData, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC })
-          .addOperation(StellarSdk.Operation.changeTrust({ asset: LAAM }))
-          .setTimeout(30)
-          .build();
-        tx.sign(activeKeypair);
-        const res = await server.submitTransaction(tx);
-        setStatus('Trustline added! Tx: ' + res.hash);
-        accountData = await server.loadAccount(activeKeypair.publicKey());
-        renderBalances(accountData);
-      }catch(err){
-        console.error(err);
-        setStatus('Error adding trustline: ' + (err.message || err));
-      }
+        const tx = new StellarSdk.TransactionBuilder(freshAccount, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC })
+            .addOperation(StellarSdk.Operation.payment({ destination: dest, asset, amount: amount }))
+            .setTimeout(30).build();
+        tx.sign(keypair);
+        await server.submitTransaction(tx);
+        setStatus(`Sent ${amount} ${assetSel} successfully.`, 'ok');
+        document.getElementById('sendForm').style.display = 'none';
+        await refreshBalances();
+    } catch (e) {
+        setStatus('Error sending: ' + (e?.response?.data?.extras?.result_codes?.operations?.[0] || e.message), 'err');
     }
-    addTrustlineBtn.addEventListener('click', addTrustline);
-
-    // ===== Fetch orderbook =====
-    async function fetchOrderbook(){
-      clearTables();
-      setStatus('Loading orderbook...');
-      let sellingAsset, buyingAsset;
-      if(tradePairSelect.value === 'xlm_to_laam'){ sellingAsset = XLM; buyingAsset = LAAM; }
-      else { sellingAsset = LAAM; buyingAsset = XLM; }
-
-      try{
-        const ob = await server.orderbook(sellingAsset, buyingAsset).call();
-
-        function rowHTML(priceDisplay, amtLaam){
-          const totalXlm = priceDisplay * amtLaam;
-          return `<tr>
-            <td title="Exact price: ${priceDisplay}">${priceDisplay.toFixed(7)}</td>
-            <td>${amtLaam.toFixed(7)}</td>
-            <td>${totalXlm.toFixed(7)}</td>
-          </tr>`;
-        }
-
-        if(ob.bids && ob.bids.length){
-          buyOffersTbody.innerHTML = ob.bids.map(b=>{
-            const px = invertPrice(b.price);
-            const amt = parseFloat(b.amount);
-            return rowHTML(px, amt);
-          }).join('');
-        } else {
-          buyOffersTbody.innerHTML = '<tr><td colspan="3" style="opacity:.7">No buy offers</td></tr>';
-        }
-
-        if(ob.asks && ob.asks.length){
-          sellOffersTbody.innerHTML = ob.asks.map(a=>{
-            const px = invertPrice(a.price);
-            const amt = parseFloat(a.amount);
-            return rowHTML(px, amt);
-          }).join('');
-        } else {
-          sellOffersTbody.innerHTML = '<tr><td colspan="3" style="opacity:.7">No sell offers</td></tr>';
-        }
-
-        setStatus('');
-      }catch(err){
-        console.error(err);
-        setStatus('Error loading offers.');
-        buyOffersTbody.innerHTML = '<tr><td colspan="3" style="color:#f66">Error</td></tr>';
-        sellOffersTbody.innerHTML = '<tr><td colspan="3" style="color:#f66">Error</td></tr>';
-      }
-    }
-
-    // Auto-refresh orderbook every 8s
-    let refreshTimer = setInterval(fetchOrderbook, 8000);
-
-    // ===== Place Offer =====
-    async function placeOffer(){
-      if(!activeKeypair){ alert('Load your secret key first.'); return; }
-      const amountRaw = parseFloat(amountInput.value);
-      const priceUi = parseFloat(priceInput.value); // XLM per Laam
-      if(!isFinite(amountRaw) || amountRaw <= 0){ alert('Enter a valid amount.'); return; }
-      if(!isFinite(priceUi) || priceUi <= 0){ alert('Enter a valid price.'); return; }
-
-      const priceLaamPerXlm = (priceUi === 0) ? 0 : (1 / priceUi);
-      let sellingAsset, buyingAsset;
-      if(tradePairSelect.value === 'xlm_to_laam'){ sellingAsset = XLM; buyingAsset = LAAM; }
-      else { sellingAsset = LAAM; buyingAsset = XLM; }
-
-      try{
-        const account = await server.loadAccount(activeKeypair.publicKey());
+});
+document.getElementById('addTrustlineBtn').addEventListener('click', async () => {
+    if (!account || !keypair) { alert('Please log in first.'); return; }
+    if (account.balances.some(b => b.asset_code === 'Laam')) { setStatus('Trustline already exists.', 'warn'); return; }
+    setStatus('Adding trustline...', 'ok');
+    try {
+        const freshAccount = await server.loadAccount(keypair.publicKey());
         const fee = await server.fetchBaseFee();
-        const tx = new StellarSdk.TransactionBuilder(account, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC })
-          .addOperation(StellarSdk.Operation.manageSellOffer({
-            selling: sellingAsset,
-            buying: buyingAsset,
-            amount: amountRaw.toFixed(7),
-            price: priceLaamPerXlm.toString(),
-            offerId: '0'
-          }))
-          .setTimeout(30)
-          .build();
-        tx.sign(activeKeypair);
-        setStatus('Submitting transaction...');
-        const res = await server.submitTransaction(tx);
-        setStatus('Offer placed. Tx: ' + res.hash);
-        // Refresh balances + orderbook after placing
-        accountData = await server.loadAccount(activeKeypair.publicKey());
-        renderBalances(accountData);
-        fetchOrderbook();
-      }catch(err){
-        console.error(err);
-        let msg = err.message || err;
-        if(err && err.response && err.response.data && err.response.data.extras && err.response.data.extras.result_codes){
-          msg = JSON.stringify(err.response.data.extras.result_codes);
-        }
-        setStatus('Error placing offer: ' + msg);
-      }
+        const tx = new StellarSdk.TransactionBuilder(freshAccount, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC })
+            .addOperation(StellarSdk.Operation.changeTrust({ asset: LAAM }))
+            .setTimeout(30).build();
+        tx.sign(keypair);
+        await server.submitTransaction(tx);
+        setStatus('Trustline added successfully.', 'ok');
+        await refreshBalances();
+    } catch (e) {
+        setStatus('Error adding trustline: ' + e.message, 'err');
     }
-    placeOfferBtn.addEventListener('click', placeOffer);
-
-    // totals helper
-    function calculateTotal(){
-      const amount = parseFloat(amountInput.value);
-      const price = parseFloat(priceInput.value);
-      if(!isFinite(amount) || !isFinite(price) || amount<=0 || price<=0){ setStatus(''); return; }
-      if(tradePairSelect.value === 'xlm_to_laam'){
-        setStatus(`You pay approx ${amount.toFixed(7)} XLM to buy Laam`);
-      } else {
-        const total = amount * price;
-        setStatus(`You will receive approx ${total.toFixed(7)} XLM by selling Laam`);
-      }
-    }
-
-    tradePairSelect.addEventListener('change', ()=>{ updateAmountLabel(); fetchOrderbook(); calculateTotal(); });
-    amountInput.addEventListener('input', calculateTotal);
-    priceInput.addEventListener('input', calculateTotal);
-
-    // init
-    updateAmountLabel();
-    renderBalances(null);
-    fetchOrderbook();
-  </script>
-</body>
-</html>
+});
+async function placeOffer(isBuy) {
+    if (!account || !keypair) { alert('Please log in first.'); return; }
+    const price = document.getElementById(isBuy ? 'buyPrice' : 'sellPrice').value;
+    const amount = document.getElementById(isBuy ? 'buyAmount' : 'sellAmount').value;
+    if (!(parseFloat(price) > 0) || !(parseFloat(amount) > 0)) { alert('Enter a valid price and amount.'); return; }
+    setStatus('Placing offer...', 'ok');
+    try {
+        const freshAccount = await server.loadAccount(keypair.publicKey());
+        const fee = await server.fetchBaseFee();
+        const op = isBuy
+            ? StellarSdk.Operation.manageBuyOffer({ selling: XLM, buying: LAAM, buyAmount: amount, price: price })
+            : StellarSdk.Operation.manageSellOffer({ selling: LAAM, buying: XLM, amount: amount, price: price });
+        const tx = new StellarSdk.TransactionBuilder(freshAccount, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC })
+  
