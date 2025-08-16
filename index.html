@@ -1,246 +1,148 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laam DEX</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/10.5.0/stellar-sdk.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/10.5.1/stellar-sdk.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f6fa;
-      color: #222;
-    }
-    header {
-      background: #004aad;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 20px;
-      padding: 20px;
-    }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    .portfolio {
-      text-align: center;
-    }
-    .buttons {
-      display: flex;
-      justify-content: space-around;
-      margin: 15px 0;
-    }
-    .buttons button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #004aad;
-      color: #fff;
-      font-weight: bold;
-    }
-    h2 {
-      text-align: center;
-      color: #004aad;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table th, table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      font-size: 14px;
-      text-align: center;
-    }
-    table th {
-      background: #f0f0f0;
-    }
-    .trade-section {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-    }
-    .trade-box {
-      flex: 1;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 15px;
-      background: #fff;
-    }
-    .trade-box h3 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #004aad;
-    }
-    .trade-box input {
-      width: 90%;
-      padding: 8px;
-      margin: 5px auto;
-      display: block;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .trade-box button {
-      display: block;
-      margin: 10px auto;
-      padding: 8px 15px;
-      background: #004aad;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 0; color: #222; }
+    header { background: #1e3a8a; color: white; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
+    .container { padding: 20px; max-width: 1200px; margin: auto; }
+    .portfolio { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .portfolio h2 { margin: 0 0 10px; font-size: 20px; }
+    .buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+    .buttons button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .send { background: #2563eb; color: white; }
+    .receive { background: #059669; color: white; }
+    .trust { background: #f59e0b; color: white; }
+    .lock { background: #6b7280; color: white; }
+    .assets { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .assets table { width: 100%; border-collapse: collapse; }
+    .assets th, .assets td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
+    .tabs { display: flex; margin: 20px 0; border-bottom: 2px solid #ddd; }
+    .tabs button { flex: 1; padding: 10px; border: none; background: none; font-weight: bold; cursor: pointer; }
+    .tabs button.active { border-bottom: 3px solid #2563eb; color: #2563eb; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .orderbook, .trades, .buy-sell { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+    .buy, .sell { padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; }
+    .buy { background: #10b981; color: white; }
+    .sell { background: #ef4444; color: white; margin-top: 10px; }
   </style>
 </head>
 <body>
   <header>Laam DEX</header>
-
   <div class="container">
-    <!-- Wallet Section -->
-    <div>
-      <div class="card portfolio">
-        <h2>Portfolio</h2>
-        <p id="balanceXLM">XLM: --</p>
-        <p id="balanceLaam">Laam: --</p>
-      </div>
 
-      <div class="card buttons">
-        <button onclick="sendAsset()">Send</button>
-        <button onclick="receiveAsset()">Receive</button>
-        <button onclick="addTrustline()">Add Laam</button>
-        <button onclick="lockWallet()">Lock</button>
-      </div>
+    <!-- Portfolio -->
+    <div class="portfolio">
+      <h2>Portfolio</h2>
+      <p>Total Value: <span id="portfolioValue">Loading...</span></p>
+    </div>
 
-      <div class="card">
-        <h2>My Assets</h2>
-        <p id="myAssets">Loading...</p>
-      </div>
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="send">Send</button>
+      <button class="receive">Receive</button>
+      <button class="trust">Add Laam Trustline</button>
+      <button class="lock">Lock Wallet</button>
+    </div>
+
+    <!-- Assets -->
+    <div class="assets">
+      <h3>My Assets</h3>
+      <table>
+        <thead>
+          <tr><th>Asset</th><th>Balance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>XLM</td><td id="xlmBalance">Loading...</td></tr>
+          <tr><td>Laam</td><td id="laamBalance">Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Trade Section -->
-    <div>
-      <div class="card">
-        <h2>Trade Laam/XLM</h2>
-        <p id="priceUpdate">Live Price: --</p>
-        
-        <div class="trade-section">
-          <!-- Buy Box -->
-          <div class="trade-box">
-            <h3>Buy Laam</h3>
-            <input type="number" id="buyAmount" placeholder="Amount (Laam)">
-            <input type="number" id="buyPrice" placeholder="Price (XLM)">
-            <button onclick="placeBuy()">Buy</button>
-          </div>
-          <!-- Sell Box -->
-          <div class="trade-box">
-            <h3>Sell Laam</h3>
-            <input type="number" id="sellAmount" placeholder="Amount (Laam)">
-            <input type="number" id="sellPrice" placeholder="Price (XLM)">
-            <button onclick="placeSell()">Sell</button>
-          </div>
-        </div>
+    <div class="trade">
+      <div class="tabs">
+        <button class="active" onclick="openTab('overview')">Overview</button>
+        <button onclick="openTab('orderbook')">Orderbook</button>
+        <button onclick="openTab('trades')">Last Trades</button>
+        <button onclick="openTab('buySell')">Buy/Sell</button>
       </div>
 
-      <div class="card">
-        <h2>Order Book</h2>
+      <div id="overview" class="tab-content active">
+        <h3>Market Overview (Laam/XLM)</h3>
+        <p>Price: <span id="marketPrice">Loading...</span></p>
+        <p>24h Volume: <span id="marketVolume">Loading...</span></p>
+      </div>
+
+      <div id="orderbook" class="tab-content">
+        <h3>Orderbook</h3>
         <table>
-          <thead>
-            <tr><th>Price (XLM)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr>
-          </thead>
-          <tbody id="orderBook"></tbody>
+          <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
+          <tbody id="orderbookData"><tr><td colspan="3">Loading...</td></tr></tbody>
         </table>
       </div>
 
-      <div class="card">
-        <h2>Last Trades</h2>
+      <div id="trades" class="tab-content">
+        <h3>Last Trades</h3>
         <table>
-          <thead>
-            <tr><th>Type</th><th>Amount</th><th>Price</th></tr>
-          </thead>
-          <tbody id="lastTrades"></tbody>
+          <thead><tr><th>Price</th><th>Amount</th><th>Type</th></tr></thead>
+          <tbody id="tradeHistory"><tr><td colspan="3">Loading...</td></tr></tbody>
         </table>
+      </div>
+
+      <div id="buySell" class="tab-content">
+        <h3>Trade Laam/XLM</h3>
+        <input id="amount" type="number" placeholder="Amount Laam" style="width:100%; margin-bottom:10px; padding:8px;">
+        <input id="price" type="number" placeholder="Price (XLM per Laam)" style="width:100%; margin-bottom:10px; padding:8px;">
+        <button class="buy">Buy Laam</button>
+        <button class="sell">Sell Laam</button>
       </div>
     </div>
   </div>
 
-<script>
-const server = new StellarSdk.Server("https://horizon.stellar.org");
-const issuer = "GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64";
-const laamAsset = new StellarSdk.Asset("Laam", issuer);
+  <script>
+    const server = new StellarSdk.Server("https://horizon.stellar.org");
+    const laamIssuer = "GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64";
+    const laamAsset = new StellarSdk.Asset("Laam", laamIssuer);
 
-// Balances
-async function loadBalances(pubKey) {
-  try {
-    const account = await server.loadAccount(pubKey);
-    let xlm = 0, laam = 0;
-    account.balances.forEach(b => {
-      if (b.asset_type === "native") xlm = b.balance;
-      if (b.asset_code === "Laam") laam = b.balance;
-    });
-    document.getElementById("balanceXLM").innerText = "XLM: " + xlm;
-    document.getElementById("balanceLaam").innerText = "Laam: " + laam;
-  } catch (e) {
-    console.log("Error loading balances", e);
-  }
-}
+    function openTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
 
-// Orderbook
-async function loadOrderBook() {
-  const ob = await server.orderbook(laamAsset, StellarSdk.Asset.native()).call();
-  const tbody = document.getElementById("orderBook");
-  tbody.innerHTML = "";
-  ob.bids.forEach(b => {
-    tbody.innerHTML += `<tr><td>${b.price}</td><td>${b.amount}</td><td>${(b.price * b.amount).toFixed(2)}</td></tr>`;
-  });
-  ob.asks.forEach(a => {
-    tbody.innerHTML += `<tr><td>${a.price}</td><td>${a.amount}</td><td>${(a.price * a.amount).toFixed(2)}</td></tr>`;
-  });
-  if (ob.asks.length > 0) {
-    document.getElementById("priceUpdate").innerText = "Live Price: " + ob.asks[0].price + " XLM/Laam";
-  }
-}
+    async function loadBalances(publicKey) {
+      try {
+        const account = await server.loadAccount(publicKey);
+        let xlm = account.balances.find(b => b.asset_type === "native");
+        let laam = account.balances.find(b => b.asset_code === "Laam");
+        document.getElementById("xlmBalance").innerText = xlm ? xlm.balance : "0";
+        document.getElementById("laamBalance").innerText = laam ? laam.balance : "0";
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-// Last Trades
-async function loadTrades() {
-  const trades = await server.trades().forAssetPair(laamAsset, StellarSdk.Asset.native()).limit(5).call();
-  const tbody = document.getElementById("lastTrades");
-  tbody.innerHTML = "";
-  trades.records.forEach(t => {
-    tbody.innerHTML += `<tr><td>${t.base_is_seller ? "Sell" : "Buy"}</td><td>${t.base_amount}</td><td>${t.price.n/t.price.d}</td></tr>`;
-  });
-}
+    async function loadOrderbook() {
+      let book = await server.orderbook(laamAsset, StellarSdk.Asset.native()).call();
+      let rows = "";
+      book.bids.forEach(bid => {
+        rows += `<tr><td>${bid.price}</td><td>${bid.amount}</td><td>${(bid.price*bid.amount).toFixed(2)}</td></tr>`;
+      });
+      document.getElementById("orderbookData").innerHTML = rows || "<tr><td colspan='3'>No orders</td></tr>";
+    }
 
-// Dummy Functions
-function sendAsset(){ alert("Send clicked"); }
-function receiveAsset(){ alert("Receive clicked"); }
-function addTrustline(){ alert("Trustline added"); }
-function lockWallet(){ alert("Wallet locked"); }
-function placeBuy(){ alert("Buy order placed"); }
-function placeSell(){ alert("Sell order placed"); }
-
-// Auto refresh
-setInterval(() => {
-  loadOrderBook();
-  loadTrades();
-}, 5000);
-
-// Example test key
-const testPubKey = "G...YOUR_PUBLIC_KEY";
-loadBalances(testPubKey);
-</script>
+    loadBalances("YOUR_PUBLIC_KEY"); // Replace with connected wallet
+    loadOrderbook();
+    setInterval(loadOrderbook, 5000);
+  </script>
 </body>
 </html>
