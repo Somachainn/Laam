@@ -20,106 +20,141 @@
   body{
     margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--text);
-    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    background:linear-gradient(135deg,#b8c6db,#f5f7fa);
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 14px;
   }
   .app{ width:100%; max-width:450px; text-align:center; }
-  .logo-container{ display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:30px; }
-  .logo-container img{ width:60px; height:60px; border-radius:12px; }
-  h1{ margin:0; font-size:2.2rem; font-weight:800; color:var(--brand); text-shadow:1px 1px 2px rgba(0,0,0,0.1); }
   
-  /* Import Card Styles - matching the image design */
+  /* Logo and Header Styles - matching the image */
+  .logo-container{ 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    gap:15px; 
+    margin-bottom:40px; 
+  }
+  .logo-container img{ 
+    width:80px; 
+    height:80px; 
+    border-radius:50%;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  }
+  h1{ 
+    margin:0; 
+    font-size:3rem; 
+    font-weight:800; 
+    color:#1976d2; 
+    text-shadow:1px 1px 2px rgba(0,0,0,0.1); 
+  }
+  
+  /* Import Card Styles - exactly matching the image design */
   .import-card{
-    background:var(--card); 
-    border:1px solid var(--line); 
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.1); 
-    padding:30px; 
-    margin:14px auto;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background:rgba(255, 255, 255, 0.95);
+    border:none;
+    border-radius:24px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.12);
+    padding:40px 30px;
+    margin:0 auto;
+    backdrop-filter:blur(10px);
+    max-width:100%;
   }
   
   .form-group{
-    margin-bottom:20px;
+    margin-bottom:24px;
     text-align:left;
   }
   
   .form-label{
     display:block;
-    font-size:16px;
-    font-weight:600;
-    color:var(--brand);
-    margin-bottom:8px;
+    font-size:18px;
+    font-weight:700;
+    color:#1976d2;
+    margin-bottom:12px;
   }
   
   .form-input{
     width:100%;
-    padding:16px;
-    border:2px solid var(--line);
-    border-radius:12px;
+    padding:20px;
+    border:2px solid #e0e0e0;
+    border-radius:16px;
     font-size:16px;
     background:#f8f9fa;
-    color:var(--text);
+    color:#333;
     outline:none;
     transition:all 0.3s ease;
-    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-family:'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   }
   
   .form-input:focus{
-    border-color:var(--brand);
+    border-color:#1976d2;
     background:white;
-    box-shadow:0 0 0 3px rgba(0,82,204,0.1);
+    box-shadow:0 0 0 4px rgba(25,118,210,0.1);
   }
   
   .form-input::placeholder{
-    color:#a0aec0;
+    color:#bbb;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   
   .import-button{
     width:100%;
-    padding:18px;
-    background:var(--brand);
+    padding:20px;
+    background:#1976d2;
     color:white;
     border:none;
-    border-radius:12px;
-    font-size:16px;
+    border-radius:16px;
+    font-size:18px;
     font-weight:700;
     text-transform:uppercase;
-    letter-spacing:0.5px;
+    letter-spacing:1px;
     cursor:pointer;
     transition:all 0.3s ease;
-    box-shadow:0 8px 20px rgba(0,82,204,0.3);
-    margin-top:10px;
+    box-shadow:0 4px 16px rgba(25,118,210,0.3);
+    margin-top:16px;
   }
   
   .import-button:hover{
-    background:var(--brand2);
-    box-shadow:0 12px 25px rgba(0,65,163,0.4);
+    background:#1565c0;
+    box-shadow:0 6px 20px rgba(25,118,210,0.4);
     transform:translateY(-2px);
   }
   
+  .divider{
+    margin:32px 0;
+    text-align:center;
+    position:relative;
+  }
+  
+  .divider::before{
+    content:'';
+    position:absolute;
+    top:50%;
+    left:0;
+    right:0;
+    height:1px;
+    background:#e0e0e0;
+  }
+  
+  .divider-text{
+    background:rgba(255, 255, 255, 0.95);
+    padding:0 16px;
+    color:#666;
+    font-size:14px;
+    font-weight:500;
+  }
+  
   .generate-link{
-    margin-top:20px;
-    padding-top:20px;
-    border-top:1px solid var(--line);
     text-align:center;
   }
   
-  .generate-text{
-    color:var(--muted);
-    font-size:14px;
-    margin-bottom:8px;
-  }
-  
   .generate-button{
-    color:var(--brand);
+    color:#1976d2;
     text-decoration:underline;
     background:none;
     border:none;
     cursor:pointer;
-    font-size:14px;
+    font-size:16px;
+    font-weight:600;
     transition:color 0.3s ease;
     text-transform:none;
     padding:0;
@@ -128,18 +163,19 @@
   }
   
   .generate-button:hover{
-    color:var(--brand2);
+    color:#1565c0;
     transform:none;
     box-shadow:none;
   }
   
   .note-text{
     font-size:12px;
-    color:var(--muted);
+    color:#666;
     margin-top:8px;
+    line-height:1.4;
   }
 
-  /* Original styles for other sections */
+  /* Original styles for other sections - keeping all functionality */
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:var(--rad);
     box-shadow:0 10px 30px rgba(0,0,0,0.1); padding:22px; margin:14px auto;
@@ -254,17 +290,17 @@
     }
     
     .import-card {
-      padding: 20px;
+      padding: 30px 20px;
       margin: 10px;
     }
     
     .logo-container img {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
     }
     
     h1 {
-      font-size: 1.8rem;
+      font-size: 2.2rem;
     }
   }
 </style>
@@ -276,23 +312,26 @@
       <h1>Laam wallet</h1>
     </div>
 
-    <!-- AUTH SECTION - Modified to match the image design -->
+    <!-- AUTH SECTION - Modified to match the image design exactly -->
     <div id="authSection">
       <div class="import-card">
         <div id="unlockView" class="hidden">
-          <h3 style="margin:0 0 20px 0; color:var(--brand); text-align:center;">Unlock Wallet</h3>
+          <h3 style="margin:0 0 20px 0; color:#1976d2; text-align:center; font-size:1.5rem;">Unlock Wallet</h3>
           <div class="form-group">
             <label class="form-label" for="walletPassword">Password</label>
             <input class="form-input" id="walletPassword" type="password" placeholder="Enter your password" />
           </div>
           <button class="import-button" id="unlockBtn">Unlock</button>
+          <div class="divider">
+            <span class="divider-text">or</span>
+          </div>
           <div class="generate-link">
-            <p class="muted" style="margin:0;"><a href="#" id="resetWalletLink" style="color:var(--brand);">Reset and Import New Key</a></p>
+            <a href="#" id="resetWalletLink" style="color:#1976d2; text-decoration:none;">Reset and Import New Key</a>
           </div>
         </div>
 
         <div id="initialView">
-          <!-- Single card design matching the image -->
+          <!-- Single card design exactly matching the image -->
           <div class="form-group">
             <label class="form-label" for="secretKeyInput">Secret Key (S...)</label>
             <input class="form-input" id="secretKeyInput" type="password" placeholder="SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
@@ -305,8 +344,11 @@
           
           <button class="import-button" id="importAndSaveBtn">Import and Save</button>
           
+          <div class="divider">
+            <span class="divider-text">Ama</span>
+          </div>
+          
           <div class="generate-link">
-            <p class="generate-text">Ama</p>
             <button class="generate-button" id="generateAccountBtn">Generate new Stellar account</button>
             <p class="note-text">(xasuuso: waa in aad ku shubtaa ugu yaraan 2 XLM si loo furo)</p>
           </div>
@@ -314,7 +356,7 @@
       </div>
     </div>
 
-    <!-- LOGGED IN VIEW - Keep original functionality -->
+    <!-- LOGGED IN VIEW - Keep all original functionality -->
     <div id="loggedInView" class="hidden">
       <div class="card">
         <div class="balances">
@@ -476,7 +518,7 @@
     function formatAmount(amount) {
       return parseFloat(amount).toFixed(7);
     }
-         
+    
     function encryptSecretKey(secretKey, password) {
       return CryptoJS.AES.encrypt(secretKey, password).toString();
     }
@@ -985,4 +1027,4 @@ Would you like to use this account?`;
     });
   </script>
 </body>
-</html>     
+</html>
