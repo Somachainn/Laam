@@ -500,11 +500,38 @@
   <script>
     // Global variables
     let currentKeypair = null;
-    let server = new StellarSdk.Server('https://horizon.stellar.org');
+    let server = null;
     let isTestnet = false;
     
+    // Initialize Stellar SDK when page loads
+    function initializeStellar() {
+      try {
+        if (typeof StellarSdk !== 'undefined') {
+          server = new StellarSdk.Server('https://horizon.stellar.org');
+          console.log('Stellar SDK initialized successfully');
+        } else {
+          console.error('Stellar SDK not loaded');
+          showError('Stellar SDK failed to load. Please refresh the page.');
+        }
+      } catch (error) {
+        console.error('Error initializing Stellar SDK:', error);
+        showError('Failed to initialize Stellar SDK: ' + error.message);
+      }
+    }
+    
     // Laam asset details
-    const LAAM_ASSET = new StellarSdk.Asset('LAAM', 'GCKFBEIYTKP5RDBQMTVVALOEWNYXTNJUI63FRLPQ6VQJJ5LJNF7DSUMR');
+    let LAAM_ASSET = null;
+    
+    function initializeAssets() {
+      try {
+        if (typeof StellarSdk !== 'undefined') {
+          LAAM_ASSET = new StellarSdk.Asset('LAAM', 'GCKFBEIYTKP5RDBQMTVVALOEWNYXTNJUI63FRLPQ6VQJJ5LJNF7DSUMR');
+          console.log('Assets initialized successfully');
+        }
+      } catch (error) {
+        console.error('Error initializing assets:', error);
+      }
+    }
     
     // Utility functions
     function showError(message) {
@@ -534,10 +561,38 @@
     
     // Enhanced form validation and interaction
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing...');
+      
+      // Initialize Stellar SDK and assets
+      initializeStellar();
+      initializeAssets();
+      
+      // Check if libraries are loaded
+      if (typeof StellarSdk === 'undefined') {
+        console.error('StellarSdk is not defined');
+        showError('Stellar SDK failed to load. Please refresh the page.');
+        return;
+      }
+      
+      if (typeof CryptoJS === 'undefined') {
+        console.error('CryptoJS is not defined');
+        showError('CryptoJS failed to load. Please refresh the page.');
+        return;
+      }
+      
+      console.log('All libraries loaded successfully');
+      
       // Form submission handler
       const importForm = document.getElementById('importAndSaveBtn');
       const secretKeyInput = document.getElementById('secretKeyInput');
       const passwordInput = document.getElementById('savePasswordInput');
+      
+      if (!importForm || !secretKeyInput || !passwordInput) {
+        console.error('Required elements not found');
+        return;
+      }
+      
+      console.log('Form elements found successfully');
       
       // Add interactive effects
       document.querySelectorAll('.form-input').forEach(input => {
@@ -552,9 +607,13 @@
 
       importForm.addEventListener('click', async function(e) {
         e.preventDefault();
+        console.log('Import button clicked');
         
         const secretKey = secretKeyInput.value.trim();
         const password = passwordInput.value;
+        
+        console.log('Secret key length:', secretKey.length);
+        console.log('Password length:', password.length);
         
         if (!secretKey.startsWith('S') || secretKey.length !== 56) {
           showError('Invalid secret key format. Secret key should start with S and be 56 characters long.');
@@ -571,15 +630,20 @@
         this.disabled = true;
         
         try {
+          console.log('Validating secret key...');
           // Validate secret key
           currentKeypair = StellarSdk.Keypair.fromSecret(secretKey);
+          console.log('Secret key validated successfully');
           
           // Encrypt and save
+          console.log('Encrypting and saving...');
           const encryptedKey = encryptSecretKey(secretKey, password);
           localStorage.setItem('laam_wallet_key', encryptedKey);
           localStorage.setItem('laam_wallet_public', currentKeypair.publicKey());
+          console.log('Wallet saved successfully');
           
           // Load wallet
+          console.log('Loading wallet...');
           await loadWallet();
           
           showSuccess('Wallet imported successfully!');
@@ -587,6 +651,7 @@
           document.getElementById('loggedInView').classList.remove('hidden');
           
         } catch (error) {
+          console.error('Import error:', error);
           showError('Failed to import wallet: ' + error.message);
         } finally {
           this.textContent = 'Import and Save';
@@ -596,12 +661,17 @@
       
       // Generate new account function
       document.getElementById('generateAccountBtn').addEventListener('click', function() {
-        const newKeypair = StellarSdk.Keypair.random();
-        const secretKey = newKeypair.secret();
-        const publicKey = newKeypair.publicKey();
+        console.log('Generate account button clicked');
         
-        const message = `New Stellar Account Generated:
-        
+        try {
+          const newKeypair = StellarSdk.Keypair.random();
+          const secretKey = newKeypair.secret();
+          const publicKey = newKeypair.publicKey();
+          
+          console.log('New keypair generated successfully');
+          
+          const message = `New Stellar Account Generated:
+          
 Secret Key: ${secretKey}
 Public Key: ${publicKey}
 
@@ -609,9 +679,14 @@ Public Key: ${publicKey}
 You will need to fund this account with at least 2 XLM to activate it.
 
 Would you like to use this account?`;
-        
-        if (confirm(message)) {
-          secretKeyInput.value = secretKey;
+          
+          if (confirm(message)) {
+            secretKeyInput.value = secretKey;
+            console.log('Secret key filled into input field');
+          }
+        } catch (error) {
+          console.error('Generate account error:', error);
+          showError('Failed to generate account: ' + error.message);
         }
       });
       
