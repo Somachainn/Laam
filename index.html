@@ -183,52 +183,6 @@ button:hover{background:var(--brand2)}
       </div>
     </div>
 </div>
-  <!-- Trade Modal -->
-  <div id="tradeModal" class="trade-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Buy Laam</h3>
-        <button class="modal-close" onclick="closeTradeModal()">&times;</button>
-      </div>
-      <div class="panel">
-        <div class="titleRow">
-          <div class="title" id="panelTitle">Buy Laam</div>
-          <div class="avail">Available: <span id="availBalance">0 XLM</span></div>
-        </div>
-
-        <div class="field">
-          <div class="inputWrap">
-            <input id="modalPrice" type="number" step="0.0000001" placeholder="0.135" />
-            <div class="unit">XLM</div>
-          </div>
-          <div class="hint">Price (XLM per Laam)</div>
-        </div>
-
-        <div class="field">
-          <div class="inputWrap">
-            <input id="modalAmount" type="number" step="0.0000001" placeholder="Amount" />
-            <div class="unit">Laam</div>
-          </div>
-          <div class="rowBtns">
-            <button data-fill="25">25%</button>
-            <button data-fill="50">50%</button>
-            <button data-fill="75">75%</button>
-            <button data-fill="100">100%</button>
-          </div>
-        </div>
-
-        <div class="totalBox">
-          <div class="inputWrap">
-            <input id="modalTotal" type="number" step="0.0000001" placeholder="0.0000000" disabled />
-            <div class="unit">XLM</div>
-          </div>
-          <div class="hint" id="totalHint">Total XLM you'll pay</div>
-        </div>
-
-        <button class="cta buy" id="modalConfirmBtn">Buy Laam</button>
-      </div>
-    </div>
-  </div>
 
 <script>
     <!-- Portfolio (Top) -->    
